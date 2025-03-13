@@ -1,6 +1,7 @@
-import 'package:chateo/ui/your_profile.dart';
+import 'package:chateo/ui/Verification.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -29,7 +30,7 @@ class _LoginScreenState extends State<LoginScreen> {
         Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => YourProfile(),
+              builder: (context) => Verification(Phonenumber: '',),
             ));
       }
     } catch (e) {
@@ -75,7 +76,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               keyboardType: TextInputType.emailAddress,
             ),
-            SizedBox(height: 20),
+            SizedBox(height: 20.h),
             TextField(
               controller: passwordController,
               decoration: InputDecoration(
@@ -84,7 +85,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               obscureText: true,
             ),
-            SizedBox(height: 20),
+            SizedBox(height: 20.h),
             ElevatedButton(
               onPressed: () {
                 _login(context);
@@ -94,6 +95,9 @@ class _LoginScreenState extends State<LoginScreen> {
               },
               child: Text("Login"),
             ),
+TextButton(onPressed: (){
+  Navigator.push(context, MaterialPageRoute(builder: (context) => Verification(Phonenumber: '',),));
+}, child: Text("already logged in"))
           ],
         ),
       ),
