@@ -1,5 +1,5 @@
 import 'package:chateo/ui/otp.dart';
-import 'package:chateo/ui/your_profile.dart';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -16,14 +16,14 @@ class Verification extends StatefulWidget {
 class _VerificationState extends State<Verification> {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
   CollectionReference users = FirebaseFirestore.instance.collection("users");
-  CollectionReference user = FirebaseFirestore.instance.collection("user");
+
 
   final TextEditingController _phoneController = TextEditingController();
 
   Future<void> verification() async {
     String phonenumber = _phoneController.text.trim();
 
-    return user
+    return users
         .add({"Phonenumber": _phoneController.text})
         .then((value) => print("User Added"))
         .catchError((error) => print("Failed to add user: $error"));

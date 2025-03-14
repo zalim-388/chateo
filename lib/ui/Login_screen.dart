@@ -62,7 +62,9 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Login")),
+      appBar: AppBar(title: Text("Login"),actions: [TextButton(onPressed: (){
+  Navigator.push(context, MaterialPageRoute(builder: (context) => Verification(Phonenumber: '',),));
+}, child: Text("skip"))],),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -95,12 +97,17 @@ class _LoginScreenState extends State<LoginScreen> {
               },
               child: Text("Login"),
             ),
-TextButton(onPressed: (){
-  Navigator.push(context, MaterialPageRoute(builder: (context) => Verification(Phonenumber: '',),));
-}, child: Text("already logged in"))
+// TextButton(onPressed: (){
+//   Navigator.push(context, MaterialPageRoute(builder: (context) => Verification(Phonenumber: '',),));
+// }, child: Text("already logged in"))
           ],
         ),
       ),
     );
   }
 }
+
+
+
+  
+
