@@ -1,5 +1,4 @@
 import 'package:chateo/ui/otp.dart';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -23,10 +22,16 @@ class _VerificationState extends State<Verification> {
   Future<void> verification() async {
     String phonenumber = _phoneController.text.trim();
 
+    if(phonenumber.isEmpty){
+      print("Fields cannot be empty");
+      return;
+    }
+
     return users
         .add({"Phonenumber": _phoneController.text})
         .then((value) => print("User Added"))
         .catchError((error) => print("Failed to add user: $error"));
+
   }
 
   @override
