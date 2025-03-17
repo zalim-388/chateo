@@ -30,7 +30,9 @@ class _LoginScreenState extends State<LoginScreen> {
         Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => Verification(Phonenumber: '',),
+              builder: (context) => Verification(
+                Phonenumber: '',
+              ),
             ));
       }
     } catch (e) {
@@ -62,9 +64,22 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Login"),actions: [TextButton(onPressed: (){
-  Navigator.push(context, MaterialPageRoute(builder: (context) => Verification(Phonenumber: '',),));
-}, child: Text("skip"))],),
+      appBar: AppBar(
+        title: Text("Login"),
+        actions: [
+          TextButton(
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => Verification(
+                        Phonenumber: '',
+                      ),
+                    ));
+              },
+              child: Text("skip"))
+        ],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -88,26 +103,45 @@ class _LoginScreenState extends State<LoginScreen> {
               obscureText: true,
             ),
             SizedBox(height: 20.h),
-            ElevatedButton(
-              onPressed: () {
+            // ElevatedButton(
+            //   onPressed: () {
+            //     _login(context);
+            //     String email = emailController.text;
+            //     String password = passwordController.text;
+            //     print("Email: $email, Password: $password");
+            //   },
+            //   child: Text("Login"),
+            // ),
+// TextButton(onPressed: (){
+//   Navigator.push(context, MaterialPageRoute(builder: (context) => Verification(Phonenumber: '',),));
+// }, child: Text("already logged in"))
+
+            GestureDetector(
+              onTap: () {
                 _login(context);
                 String email = emailController.text;
                 String password = passwordController.text;
                 print("Email: $email, Password: $password");
               },
-              child: Text("Login"),
+              child: Container(
+                height: 52.h,
+                width: 327.w,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  color: Color(0xFF002DE3),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  "Login",
+                  style: TextStyle(color: Colors.white, fontSize: 17),
+                ),
+              ),
             ),
-// TextButton(onPressed: (){
-//   Navigator.push(context, MaterialPageRoute(builder: (context) => Verification(Phonenumber: '',),));
-// }, child: Text("already logged in"))
+
+            TextButton(onPressed: () {}, child: Text("Forget password"))
           ],
         ),
       ),
     );
   }
 }
-
-
-
-  
-

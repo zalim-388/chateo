@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -36,104 +38,109 @@ class _ContactsState extends State<Contacts> {
     String name = _namecontroller.text.trim();
     String number = _phoneController.text.trim();
 
-    // return contactsRef
-    //     .doc("Contacts")
-    //     .set({"name": name, "number": number})
-    //     .then((value) => print(" Add user"))
-    //     .catchError((Error) => print(Error));
-    return
-    contactsRef
-        .add({"name": name, "number": number})
-        .then((value) => print("add user"))
+    return contactsRef
+        .doc("Contacts")
+        .update({
+          "contacts": FieldValue.arrayUnion([
+            {"name": name, "number": number}
+          ])
+        })
+        .then((value) => print(" Add user"))
         .catchError((Error) => print(Error));
+
+    // return contactsRef
+
+    //     .add({"name": name, "number": number})
+    //     .then((value) => print("add user"))
+    //     .catchError((Error) => print(Error));
+  }
+
+  Future<void> deletecontacts() async {
+    return contactsRef
+        .doc("Contacts")
+        .delete()
+        .then((value) => print("User Deleted"))
+        .catchError((error) => print("Failed to delete user: $error"));
   }
 
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 40),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                children: [
-                  Text(
-                    "Contacts",
-                    style: TextStyle(fontSize: 25, color: Color(0xFF002DE3)),
-                  ),
-                  SizedBox(
-                    width: 220.w,
-                  ),
-                  IconButton(
-                      onPressed: () => openFullScreenDialog(context,
-                          _phoneController, _namecontroller, Addcontact),
-                      icon: Icon(
-                        Icons.add,
-                        color: Color(0xFF002DE3),
-                      ))
-                ],
-              ),
+      body: Column(children: [
+        Padding(
+          padding: const EdgeInsets.only(top: 40),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Row(
+              children: [
+                Text(
+                  "Contacts",
+                  style: TextStyle(fontSize: 25, color: Color(0xFF002DE3)),
+                ),
+                SizedBox(
+                  width: 220.w,
+                ),
+                IconButton(
+                    onPressed: () => openFullScreenDialog(
+                        context, _phoneController, _namecontroller, Addcontact),
+                    icon: Icon(
+                      Icons.add,
+                      color: Color(0xFF002DE3),
+                    ))
+              ],
             ),
           ),
-          SizedBox(
-            height: 20.h,
+        ),
+        SizedBox(
+          height: 20.h,
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 25),
+          child: TextField(
+            decoration: InputDecoration(
+                hintText: "search",
+                hintStyle: TextStyle(fontSize: 17),
+                prefixIcon: Icon(Icons.search),
+                fillColor: Colors.grey.shade200,
+                filled: true,
+                border: OutlineInputBorder(borderSide: BorderSide.none),
+                focusedBorder: OutlineInputBorder(borderSide: BorderSide.none)),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 25),
-            child: TextField(
-              decoration: InputDecoration(
-                  hintText: "search",
-                  hintStyle: TextStyle(fontSize: 17),
-                  prefixIcon: Icon(Icons.search),
-                  fillColor: Colors.grey.shade200,
-                  filled: true,
-                  border: OutlineInputBorder(borderSide: BorderSide.none),
-                  focusedBorder:
-                      OutlineInputBorder(borderSide: BorderSide.none)),
-            ),
+        ),
+        Expanded(
+          child: StreamBuilder<DocumentSnapshot>(
+            stream: contactsRef.doc("Contacts").snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: CircularProgressIndicator());
+              }
+              if (!snapshot.hasData || !snapshot.data!.exists) {
+                return Center(child: Text("No contacts available"));
+              }
+
+              var data = snapshot.data!.data() as Map<String, dynamic>;
+              List contacts = data["contacts"] ?? [];
+
+              if (contacts.isEmpty) {
+                return Center(child: Text("No contacts available"));
+              }
+
+              return ListView.builder(
+                itemCount: contacts.length,
+                itemBuilder: (context, index) {
+                  var contact = contacts[index];
+                  return ListTile(
+                    leading: CircleAvatar(
+                      child: Text(contact['name'][0].toUpperCase()),
+                    ),
+                    title: Text(contact['name']),
+                    subtitle: Text(contact['number']),
+                  );
+                },
+              );
+            },
           ),
-          Expanded(
-              child: StreamBuilder<QuerySnapshot>(
-                  stream: contactsRef.snapshots(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    }
-                    if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                      return Center(child: Text("No contacts available"));
-                    }
-
-                    var contacts = snapshot.data!.docs;
-
-                    return ListView.builder(
-                      itemCount: contacts.length,
-                      itemBuilder: (context, index) {
-                        var contact = contacts[index];
-                        return ListTile(
-                          leading: CircleAvatar(
-                            child: Text(
-      (contact['name'] != null && contact['name'].isNotEmpty)
-          ? contact['name'][0].toUpperCase()
-          : '?', // Default character if name is missing
-    ),
-                          ),
-                          title: Text(
-                            contact['name'] ?? 'no name',
-                            style: TextStyle(fontSize: 20),
-                          ),
-                          subtitle: Text(
-                            contact['number'] ?? 'no number',
-                            style: TextStyle(fontSize: 17),
-                          ),
-                        );
-                      },
-                    );
-                  })),
-        ],
-      ),
+        ),
+      ]),
     );
   }
 }
