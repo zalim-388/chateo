@@ -2,18 +2,18 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class Contacts extends StatefulWidget {
   final String name;
   final String number;
-  final String email;
 
-  const Contacts(
-      {super.key,
-      required this.name,
-      required this.number,
-      required this.email});
+  const Contacts({
+    super.key,
+    required this.name,
+    required this.number,
+  });
 
   @override
   State<Contacts> createState() => _ContactsState();
@@ -24,16 +24,15 @@ class _ContactsState extends State<Contacts> {
 
   final TextEditingController _namecontroller = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
-  final TextEditingController _emailcontroller = TextEditingController();
 
   final CollectionReference contactsRef =
-      FirebaseFirestore.instance.collection("contact");
+      FirebaseFirestore.instance.collection("user");
   @override
   void initState() {
     super.initState();
     _namecontroller.text = widget.name;
     _phoneController.text = widget.number;
-    _emailcontroller.text = widget.email;
+
     fetchContacts();
   }
 
@@ -41,7 +40,6 @@ class _ContactsState extends State<Contacts> {
   void dispose() {
     _namecontroller.dispose();
     _phoneController.dispose();
-    _emailcontroller.dispose();
 
     super.dispose();
   }
@@ -49,17 +47,47 @@ class _ContactsState extends State<Contacts> {
   Future<void> Addcontact() async {
     String name = _namecontroller.text.trim();
     String number = _phoneController.text.trim();
-    String email = _emailcontroller.text.trim();
 
-    return contactsRef
-        .doc("contacts")
-        .update({
+    DocumentReference docRef = contactsRef.doc("contacts");
+
+    try {
+      DocumentSnapshot docshapshot = await docRef.get();
+
+      if (docshapshot.exists) {
+        await docRef.update({
           "contacts": FieldValue.arrayUnion([
-            {"name": name, "number": number, "email": email}
+            {
+              "name": name,
+              "number": number,
+            }
           ])
-        })
-        .then((value) => print(" Add user"))
-        .catchError((Error) => print(Error));
+        });
+      } else {
+        await docRef.set({
+          "contacts": [
+            {
+              "name": name,
+              "number": number,
+            }
+          ]
+        });
+      }
+      ;
+
+      print("Contact add sucessfully");
+    } catch (error) {
+      print("Error Adding Contact $error");
+    }
+
+    // return contactsRef
+    //     .doc("contacts")
+    //     .update({
+    //       "contacts": FieldValue.arrayUnion([
+    //         {"name": name, "number": number, "email": email}
+    //       ])
+    //     })
+    //     .then((value) => print(" Add user"))
+    //     .catchError((Error) => print(Error));
 
     // return contactsRef
 
@@ -74,30 +102,35 @@ class _ContactsState extends State<Contacts> {
         .doc("contacts")
         .update({
           "contacts": FieldValue.arrayRemove([
-            {"name": name, "number": number, "email": email}
+            {
+              "name": name,
+              "number": number,
+            }
           ])
         })
         .then((value) => print("User Deleted"))
         .catchError((error) => print("Failed to delete user: $error"));
   }
 
-List<Map<String, dynamic>> contactList = []; // Store contacts in a list
+  List<Map<String, dynamic>> contactList = []; // Store contacts in a list
 
-Future<void> fetchContacts() async {
-  DocumentSnapshot documentSnapshot =
-      await contactsRef.doc("contacts").get();
+  Future<void> fetchContacts() async {
+    DocumentSnapshot documentSnapshot = await contactsRef.doc("contacts").get();
 
-  if (documentSnapshot.exists) {
-    var data = documentSnapshot.data() as Map<String, dynamic>;
-    setState(() {
-      contactList = List<Map<String, dynamic>>.from(data["contacts"] ?? []);
-    });
-  } else {
-    print("Document does not exist");
+    if (documentSnapshot.exists) {
+      var data = documentSnapshot.data() as Map<String, dynamic>;
+      setState(() {
+        contactList = List<Map<String, dynamic>>.from(data["contacts"] ?? []);
+      });
+    } else {
+      print("Document does not exist");
+      setState(() {
+        contactList = [];
+      });
+    }
   }
-}
 
-
+  bool ShowDetails = false;
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
@@ -116,12 +149,8 @@ Future<void> fetchContacts() async {
                     width: 220.w,
                   ),
                   IconButton(
-                      onPressed: () => openFullScreenDialog(
-                          context,
-                          _phoneController,
-                          _namecontroller,
-                          _emailcontroller,
-                          Addcontact),
+                      onPressed: () => openFullScreenDialog(context,
+                          _phoneController, _namecontroller, Addcontact),
                       icon: Icon(
                         Icons.add,
                         color: Color(0xFF002DE3),
@@ -148,45 +177,96 @@ Future<void> fetchContacts() async {
             ),
           ),
           Expanded(
-              child: StreamBuilder<QuerySnapshot>(
-                  stream: contactsRef.snapshots(),
+              child: StreamBuilder<DocumentSnapshot>(
+                  stream: contactsRef.doc("contacts").snapshots(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return Center(
                         child: CircularProgressIndicator(),
                       );
                     }
-                    if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                    if (!snapshot.hasData || !snapshot.data!.exists) {
                       return Center(child: Text("No contacts available"));
                     }
 
-                    var contacts = snapshot.data!.docs;
+                    var contacts = (snapshot.data!.data()
+                            as Map<String, dynamic>)['contacts'] ??
+                        [];
 
                     return ListView.builder(
                       itemCount: contacts.length,
                       itemBuilder: (context, index) {
                         var contact = contacts[index];
-                        return GestureDetector(
-                          onLongPress: () => deletecontacts(contact['name'],
-                              contact['number'], contact['email']),
-                          child: ListTile(
-                            leading: CircleAvatar(
-                              child: Text(
-                                (contact['name'] != null &&
-                                        contact['name'].isNotEmpty)
-                                    ? contact['name'][0].toUpperCase()
-                                    : '?',
-                              ),
-                            ),
-                            title: Text(
-                              contact['name'] ?? 'no name',
-                              style: TextStyle(fontSize: 20),
-                            ),
-                            subtitle: Text(
-                              contact['number'] ?? 'no number',
-                              style: TextStyle(fontSize: 17),
+                        return ExpansionTile(
+                          leading: CircleAvatar(
+                            child: Text(
+                              (contact['name'] != null &&
+                                      contact['name'].isNotEmpty)
+                                  ? contact['name'][0].toUpperCase()
+                                  : '?',
                             ),
                           ),
+                          title: Text(
+                            contact['name'] ?? 'no name',
+                            style: TextStyle(fontSize: 20),
+                          ),
+
+                          // subtitle: Text(
+                          //   contact['number'] ?? 'no number',
+                          //   style: TextStyle(fontSize: 17),
+                          // ),
+
+                          trailing: SizedBox.shrink(),
+                          // onLongPress: () => deletecontacts(_namecontroller,
+                          //
+                          //   _namecontroller, _emailcontroller),
+                          shape: Border(),
+                          children: <Widget>[
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Column(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 40),
+                                    child: Align(
+                                      alignment: Alignment.centerLeft,
+                                      child:
+                                          Text("Mobile: ${contact["number"]}"),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: 20.h,
+                                  ),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      IconButton(
+                                        onPressed: () {},
+                                        icon: Icon(Icons.call,
+                                            color: Colors.green),
+                                      ),
+                                      IconButton(
+                                        onPressed: () {},
+                                        icon: Icon(Icons.message,
+                                            color: Colors.blue),
+                                      ),
+                                      IconButton(
+                                        onPressed: () {},
+                                        icon: Icon(Icons.video_call,
+                                            color: Colors.purple),
+                                      ),
+                                      IconButton(
+                                        onPressed: () {},
+                                        icon: Icon(Icons.info,
+                                            color: Colors.black),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         );
                       },
                     );
@@ -201,7 +281,6 @@ Future openFullScreenDialog(
         BuildContext context,
         TextEditingController phoneController,
         TextEditingController namecontroller,
-        TextEditingController emailController,
         Future<void> Function() Addcontact) =>
     showGeneralDialog(
       context: context,
@@ -267,29 +346,9 @@ Future openFullScreenDialog(
                           filled: true,
                         ),
                         keyboardType: TextInputType.number,
-                        maxLength: 10,
+                        inputFormatters: [LengthLimitingTextInputFormatter(10)],
                       ),
                       SizedBox(height: 20),
-                      TextField(
-                        controller: emailController,
-                        decoration: InputDecoration(
-                          prefixIcon: Icon(
-                            Icons.person,
-                            size: 25,
-                            color: Color(0xFF002DE3),
-                          ),
-                          hintText: "email",
-                          hintStyle: TextStyle(fontSize: 17),
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(20),
-                              borderSide: BorderSide.none),
-                          focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(20),
-                              borderSide: BorderSide.none),
-                          fillColor: Colors.grey.shade300,
-                          filled: true,
-                        ),
-                      ),
                       Row(
                         children: [
                           TextButton(
@@ -311,10 +370,7 @@ Future openFullScreenDialog(
                                 print("name:${namecontroller.text}");
                                 String number = phoneController.text.trim();
                                 print("number:${phoneController.text}");
-                                String email = emailController.text.trim();
-                                print("number:${emailController.text}");
-                                save(context, namecontroller, phoneController,
-                                    emailController);
+                                save(context, namecontroller,namecontroller);
                               },
                               child: Text(
                                 "save",
@@ -336,12 +392,11 @@ Future openFullScreenDialog(
     );
 
 void save(
-    BuildContext context,
-    TextEditingController _namecontroller,
-    TextEditingController _phoneController,
-    TextEditingController _emailcontroller) {
+  BuildContext context,
+  TextEditingController _namecontroller,
+  TextEditingController _phoneController,
+) {
   Navigator.pop(context);
   _namecontroller.clear();
   _phoneController.clear();
-  _emailcontroller.clear();
 }

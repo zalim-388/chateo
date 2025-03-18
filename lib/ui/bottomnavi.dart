@@ -14,7 +14,7 @@ class _BottomnaviState extends State<Bottomnavi> {
   int currentPageIndex = 0;
 
   final List<Widget> _bottom =[
-    Contacts(name: '', number: '', email: '',),
+    Contacts(name: '', number: '', ),
   Chats(),
 More(),
 

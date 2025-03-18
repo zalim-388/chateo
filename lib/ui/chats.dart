@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -9,6 +10,10 @@ class Chats extends StatefulWidget {
 }
 
 class _ChatsState extends State<Chats> {
+final FirebaseFirestore firestore=FirebaseFirestore.instance;
+
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,7 +35,7 @@ class _ChatsState extends State<Chats> {
                   IconButton(
                       onPressed: () {},
                       icon: Icon(
-                        Icons.add,
+                        Icons.message,
                         color: Color(0xFF002DE3),
                       )),
                 ],
@@ -39,8 +44,6 @@ class _ChatsState extends State<Chats> {
           ),
 
 //story/////////////////////
-
-
 
           SizedBox(
             height: 20.h,
