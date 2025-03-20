@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:chateo/ui/chats.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -97,7 +98,9 @@ class _ContactsState extends State<Contacts> {
   }
 
   Future<void> deletecontacts(
-      dynamic name, dynamic number, dynamic email) async {
+    dynamic name,
+    dynamic number,
+  ) async {
     return contactsRef
         .doc("contacts")
         .update({
@@ -370,7 +373,12 @@ Future openFullScreenDialog(
                                 print("name:${namecontroller.text}");
                                 String number = phoneController.text.trim();
                                 print("number:${phoneController.text}");
-                                save(context, namecontroller,namecontroller);
+
+                                save(
+                                  context,
+                                  namecontroller,
+                                  phoneController,
+                                );
                               },
                               child: Text(
                                 "save",
@@ -396,6 +404,20 @@ void save(
   TextEditingController _namecontroller,
   TextEditingController _phoneController,
 ) {
+  String name = _namecontroller.text.trim();
+  String number = _phoneController.text.trim();
+
+  if (name.isNotEmpty && number.isNotEmpty) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (
+        context,
+      ) =>
+              Chats(userid: name, chatroomid: number)),
+    );
+  }
+
   Navigator.pop(context);
   _namecontroller.clear();
   _phoneController.clear();

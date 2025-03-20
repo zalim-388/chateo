@@ -1,5 +1,4 @@
 import 'package:chateo/ui/bottomnavi.dart';
-import 'package:chateo/ui/Contacts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -13,9 +12,8 @@ class YourProfile extends StatefulWidget {
 }
 
 class _YourProfileState extends State<YourProfile> {
-
-  final TextEditingController _Firstnamecontroller=TextEditingController();
-    final TextEditingController _lastnamecontroller=TextEditingController();
+  final TextEditingController _Firstnamecontroller = TextEditingController();
+  final TextEditingController _lastnamecontroller = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -68,9 +66,14 @@ class _YourProfileState extends State<YourProfile> {
                   hintStyle: TextStyle(fontSize: 17),
                   fillColor: Colors.grey.shade200,
                   filled: true,
-                  border: OutlineInputBorder(borderSide: BorderSide.none),
-                  focusedBorder:
-                      OutlineInputBorder(borderSide: BorderSide.none)),
+                  border: OutlineInputBorder(
+                      borderSide: BorderSide(
+                    color: Color(0xFF002DE3),
+                  )),
+                  focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                    color: Color(0xFF002DE3),
+                  ))),
             ),
           ),
           SizedBox(
@@ -85,9 +88,14 @@ class _YourProfileState extends State<YourProfile> {
                   hintStyle: TextStyle(fontSize: 17),
                   fillColor: Colors.grey.shade200,
                   filled: true,
-                  border: OutlineInputBorder(borderSide: BorderSide.none),
-                  focusedBorder:
-                      OutlineInputBorder(borderSide: BorderSide.none)),
+                  border: OutlineInputBorder(
+                      borderSide: BorderSide(
+                    color: Color(0xFF002DE3),
+                  )),
+                  focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                    color: Color(0xFF002DE3),
+                  ))),
             ),
           ),
           SizedBox(

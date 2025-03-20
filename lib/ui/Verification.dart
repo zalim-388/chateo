@@ -16,13 +16,12 @@ class _VerificationState extends State<Verification> {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
   CollectionReference users = FirebaseFirestore.instance.collection("users");
 
-
   final TextEditingController _phoneController = TextEditingController();
 
   Future<void> verification() async {
     String phonenumber = _phoneController.text.trim();
 
-    if(phonenumber.isEmpty){
+    if (phonenumber.isEmpty) {
       print("Fields cannot be empty");
       return;
     }
@@ -31,7 +30,6 @@ class _VerificationState extends State<Verification> {
         .add({"Phonenumber": _phoneController.text})
         .then((value) => print("User Added"))
         .catchError((error) => print("Failed to add user: $error"));
-
   }
 
   @override
@@ -68,13 +66,18 @@ class _VerificationState extends State<Verification> {
               TextField(
                 controller: _phoneController,
                 decoration: InputDecoration(
-                  fillColor: Colors.grey.shade300,
+                  fillColor: Colors.grey.shade200,
                   filled: true,
                   hintText: "Phone Number",
                   hintStyle: TextStyle(fontSize: 20),
-                  border: OutlineInputBorder(borderSide: BorderSide.none),
-                  focusedBorder:
-                      OutlineInputBorder(borderSide: BorderSide.none),
+                  border: OutlineInputBorder(
+                      borderSide: BorderSide(
+                    color: Color(0xFF002DE3),
+                  )),
+                  focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                    color: Color(0xFF002DE3),
+                  )),
                 ),
                 keyboardType: TextInputType.number,
                 inputFormatters: [
