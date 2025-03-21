@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class More extends StatefulWidget {
-  const More({super.key});
+  final String phonenumber;
+  const More({super.key, required this.phonenumber});
 
   @override
   State<More> createState() => _MoreState();
@@ -60,7 +61,9 @@ class _MoreState extends State<More> {
                       style: TextStyle(fontSize: 20),
                     ),
                     Text(
-                      "your number",
+                      widget.phonenumber.isNotEmpty
+                          ? widget.phonenumber
+                          : "you number",
                       style: TextStyle(fontSize: 17),
                     )
                   ],
@@ -198,8 +201,6 @@ class _MoreState extends State<More> {
             SizedBox(
               height: 10.h,
             ),
-
-    
             Row(
               children: [
                 Icon(Icons.help_outline),

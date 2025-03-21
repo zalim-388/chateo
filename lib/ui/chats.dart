@@ -1,14 +1,13 @@
+import 'package:chateo/ui/Contacts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class Chats extends StatefulWidget {
-  final String userid;
-  final String chatroomid;
+  final Contacts otheruser;
   const Chats({
     super.key,
-    required this.userid,
-    required this.chatroomid,  
+    required this.otheruser,
   });
 
   @override
@@ -18,21 +17,25 @@ class Chats extends StatefulWidget {
 class _ChatsState extends State<Chats> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   TextEditingController _mesagecontroller = TextEditingController();
-  Future<void> sendmessage(String? chatroomid) async {
+  Contacts? currentuser;
+  Future<void> sendmessage(String? Contacts) async {
     String message = _mesagecontroller.text.trim();
 
     if (message.isEmpty) return;
 
-    if (chatroomid == null || chatroomid.isEmpty) {
+    if (Contacts == null || Contacts.isEmpty) {
       print("Error: chatroomid is empty or null");
-      print("Chatroom ID: ${widget.chatroomid}");
 
       return;
     }
 
-    await _firestore.collection("user").doc(chatroomid).collection("user").add({
+    await _firestore
+        .collection("user")
+        .doc("currentuser")
+        .collection("user")
+        .add({
       "text": message,
-      "sender": widget.userid,
+      "sender": widget.otheruser,
       "timestamp": FieldValue.serverTimestamp(),
     });
     _mesagecontroller.clear();
@@ -92,7 +95,7 @@ class _ChatsState extends State<Chats> {
               child: StreamBuilder(
             stream: _firestore
                 .collection("user")
-                .doc(widget.chatroomid)
+                .doc(widget.otheruser.toString())
                 .collection("user")
                 .orderBy("timestamp", descending: true)
                 .snapshots(),
@@ -101,7 +104,7 @@ class _ChatsState extends State<Chats> {
                 return Center(
                   child: CircularProgressIndicator(),
                 );
-              } else if (snapshot.hasData || snapshot.data!.docs.isEmpty) {
+              } else if (snapshot.hasData || snapshot.data!.docs.isNotEmpty) {
                 return Center(
                   child: Text("available Alla...."),
                 );
@@ -112,17 +115,16 @@ class _ChatsState extends State<Chats> {
               return ListView.builder(
                 itemCount: message.length,
                 itemBuilder: (context, index) {
-                  var messageData =
-                      message[index].data() as Map<String, dynamic>;
+                  var messageData = message[index].data();
 
                   return GestureDetector(
                     onTap: () => openFullScreenDialog(
                         context,
                         _mesagecontroller,
-                        () => sendmessage(widget.chatroomid),
+                        () => sendmessage(widget.otheruser.toString()),
                         _firestore,
-                        widget.chatroomid,
-                        widget.userid),
+                        widget.otheruser.name,
+                        widget.otheruser.number),
                     child: ListTile(
                       leading: CircleAvatar(
                         child: Text(
@@ -232,7 +234,7 @@ Future openFullScreenDialog(
                         ))
                   ],
                 ),
-              ),
+              )
             ],
           ),
         );

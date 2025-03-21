@@ -407,16 +407,16 @@ void save(
   String name = _namecontroller.text.trim();
   String number = _phoneController.text.trim();
 
-  if (name.isNotEmpty && number.isNotEmpty) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-          builder: (
-        context,
-      ) =>
-              Chats(userid: name, chatroomid: number)),
-    );
-  }
+  // if (name.isNotEmpty && number.isNotEmpty) {
+  //   Navigator.push(
+  //     context,
+  //     MaterialPageRoute(
+  //         builder: (
+  //       context,
+  //     ) =>
+  //             Chats(userid: name, chatroomid: number)),
+  //   );
+  // }
 
   Navigator.pop(context);
   _namecontroller.clear();

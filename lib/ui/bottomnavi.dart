@@ -15,8 +15,8 @@ class _BottomnaviState extends State<Bottomnavi> {
 
   final List<Widget> _bottom =[
     Contacts(name: '', number: '', ),
-  Chats(userid: '', chatroomid: '',),
-More(),
+  Chats(otheruser: Contacts(name: '', number: '')),
+More(phonenumber: '',),
 
 ];
 
