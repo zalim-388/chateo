@@ -1,6 +1,7 @@
-import 'package:chateo/ui/your_profile.dart';
+import 'package:chateo/ui/Verification.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -29,7 +30,9 @@ class _LoginScreenState extends State<LoginScreen> {
         Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => YourProfile(),
+              builder: (context) => Verification(
+                Phonenumber: '',
+              ),
             ));
       }
     } catch (e) {
@@ -61,7 +64,27 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Login")),
+      appBar: AppBar(
+        leading: IconButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            icon: Icon(Icons.arrow_back_ios)),
+        title: Text("Login"),
+        actions: [
+          TextButton(
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => Verification(
+                        Phonenumber: '',
+                      ),
+                    ));
+              },
+              child: Text("skip"))
+        ],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -71,29 +94,76 @@ class _LoginScreenState extends State<LoginScreen> {
               controller: emailController,
               decoration: InputDecoration(
                 labelText: "Email",
-                border: OutlineInputBorder(),
+                border: OutlineInputBorder(
+                    borderSide: BorderSide(
+                  color: Color(0xFF002DE3),
+                )),
+                focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                  color: Color(0xFF002DE3),
+                )),
+                fillColor: Colors.grey.shade200,
+                filled: true,
               ),
               keyboardType: TextInputType.emailAddress,
             ),
-            SizedBox(height: 20),
+            SizedBox(height: 20.h),
             TextField(
               controller: passwordController,
               decoration: InputDecoration(
                 labelText: "Password",
-                border: OutlineInputBorder(),
+                border: OutlineInputBorder(
+                  
+                    borderSide: BorderSide(
+                  color: Color(0xFF002DE3),
+                )),
+                focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                  color: Color(0xFF002DE3),
+                )),
+
+                fillColor: Colors.grey.shade200,
+                filled: true,
               ),
               obscureText: true,
             ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
+            SizedBox(height: 20.h),
+            // ElevatedButton(
+            //   onPressed: () {
+            //     _login(context);
+            //     String email = emailController.text;
+            //     String password = passwordController.text;
+            //     print("Email: $email, Password: $password");
+            //   },
+            //   child: Text("Login"),
+            // ),
+// TextButton(onPressed: (){
+//   Navigator.push(context, MaterialPageRoute(builder: (context) => Verification(Phonenumber: '',),));
+// }, child: Text("already logged in"))
+
+            GestureDetector(
+              onTap: () {
                 _login(context);
                 String email = emailController.text;
                 String password = passwordController.text;
                 print("Email: $email, Password: $password");
               },
-              child: Text("Login"),
+              child: Container(
+                height: 52.h,
+                width: 327.w,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  color: Color(0xFF002DE3),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  "Login",
+                  style: TextStyle(color: Colors.white, fontSize: 17),
+                ),
+              ),
             ),
+
+            TextButton(onPressed: () {}, child: Text("Forget password"))
           ],
         ),
       ),
