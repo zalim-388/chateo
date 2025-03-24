@@ -151,8 +151,9 @@ class _ContactsState extends State<Contacts> {
                     width: 220.w,
                   ),
                   IconButton(
-                      onPressed: () => openFullScreenDialog(context,
-                          _phoneController, _namecontroller, Addcontact),
+                      onPressed: () {
+                        openFullchatScreenDialog;
+                      },
                       icon: Icon(
                         Icons.add,
                         color: Color(0xFF002DE3),
@@ -252,10 +253,11 @@ class _ContactsState extends State<Contacts> {
                                               context,
                                               contact['name'],
                                               contact['number'],
-                                              _namecontroller
-                                                  as FirebaseFirestore,
-                                              _phoneController as String,
-                                              Addcontact() as String);
+                                              FirebaseFirestore.instance,
+                                              // Add the missing arguments here
+                                              // For example:
+                                              'additionalArgument1',
+                                              'additionalArgument2');
                                         },
                                         icon: Icon(Icons.message,
                                             color: Colors.blue),

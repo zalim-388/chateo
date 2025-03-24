@@ -43,6 +43,28 @@ class _ChatsState extends State<Chats> {
   //   return imageUrl;
   // }
 
+  Future<void> sendmessage(String number) async {
+    String message = _mesagecontroller.text.trim();
+    if (message.isEmpty) {
+      print("Error: message is empty or null");
+      return;
+    }
+    if (number.isEmpty) {
+      print("Error: chatroomid is empty or null");
+      return;
+    }
+    await _firestore
+        .collection("user") // or contactsRef
+        .doc("contacts")
+        .collection("messages")
+        .add({
+      "text": message,
+      "sender": number,
+      "timestamp": FieldValue.serverTimestamp(),
+    });
+    _mesagecontroller.clear();
+  }
+
   Widget build(BuildContext context) {
     return Scaffold(
         body: Column(
@@ -82,70 +104,63 @@ class _ChatsState extends State<Chats> {
             ),
           ),
         ),
+        SizedBox(height: 20.h),
         Expanded(
-          child: StreamBuilder<DocumentSnapshot>(
-            stream: contactsRef.doc("contacts").snapshots(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              if (!snapshot.hasData || !snapshot.data!.exists) {
-                return const Center(child: Text("No contacts available"));
-              }
-
-              var contacts =
-                  (snapshot.data!.data() as Map<String, dynamic>)['contacts'] ??
+            child: StreamBuilder<DocumentSnapshot>(
+                stream: contactsRef.doc("contacts").snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+                  if (snapshot.hasData || snapshot.data!.exists) {
+                    return Center(
+                      child: Text("No chat available"),
+                    );
+                  }
+                  var chats = (snapshot.data!.data()
+                          as Map<String, dynamic>)["chats"] ??
                       [];
+                  return ListView.builder(
+                    itemCount: chats.length,
+                    itemBuilder: (context, index) {
+                      var chat = chats[index];
+                      // String name = chat[index] ?? [];
+                      // String number= chat[index]??[];
+                      return ListTile(
+                        leading: CircleAvatar(child: Text(chat["name"]![0])),
+                        title: Text(
+                          chat['name'] ?? 'No Name',
+                          style: TextStyle(fontSize: 20),
+                        ),
 
-              return ListView.builder(
-                itemCount: contacts.length,
-                itemBuilder: (context, index) {
-                  var contact = contacts[index];
-                  String name = contact['name'] ?? 'No name';
-                  String number = contact['number'] ?? 'No number';
-
-                  return ListTile(
-                    leading: CircleAvatar(
-                      backgroundImage: contact.data != null
-                          ? NetworkImage(contact.data!)
-                          : null,
-                      child: contact.data == null
-                          ? Text(name.isNotEmpty ? name[0].toUpperCase() : '?')
-                          : null,
-                    ),
-                    title: Text(
-                      name,
-                      style: const TextStyle(fontSize: 20),
-                    ),
-                    subtitle: Text(
-                      number,
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                    onTap: () {
-                      // Optionally navigate to a chat screen with messages subcollection
-                      // Navigator.push(context, MaterialPageRoute(builder: (context) => ChatDetail(chatnumber: number, username: name)));
+                        onTap: () {
+                          openFullchatScreenDialog(
+                            context,
+                            _mesagecontroller,
+                            () => sendmessage(chat['number']),
+                            _firestore,
+                            chat['name'],
+                            chat['number'],
+                          );
+                        }
+                      );
                     },
                   );
-                },
-              );
-            },
-          ),
-        ),
+                }))
       ],
     ));
   }
 }
-
-  
-
 
 Future openFullchatScreenDialog(
         BuildContext context,
         TextEditingController _mesagecontroller,
         Future<void> Function() sendmessage,
         FirebaseFirestore firestore,
-        String chatroomid,
-        String userid) =>
+        String name,
+        String number) =>
     showGeneralDialog(
       context: context,
       barrierLabel: '',
@@ -157,7 +172,7 @@ Future openFullchatScreenDialog(
                   child: StreamBuilder<QuerySnapshot>(
                 stream: firestore
                     .collection("user")
-                    .doc(chatroomid)
+                    .doc('contacts')
                     .collection("message")
                     .orderBy("timestamp", descending: true)
                     .snapshots(),
@@ -177,7 +192,7 @@ Future openFullchatScreenDialog(
                     itemBuilder: (context, index) {
                       var message = messages[index];
 
-                      bool isme = message["sender"] == userid;
+                      bool isme = message["sender"] == number;
 
                       return Align(
                         alignment:
@@ -229,25 +244,3 @@ Future openFullchatScreenDialog(
         );
       },
     );
-
-
-
-
-  // Future<void> sendmessage(String chatroomid) async {
-  //   String message = _mesagecontroller.text.trim();
-  //   if (message.isEmpty) return;
-  //   if (chatroomid.isEmpty) {
-  //     print("Error: chatroomid is empty or null");
-  //     return;
-  //   }
-  //   await _firestore
-  //       .collection("user") // Ensure correct collection
-  //       .doc()
-  //       .collection("messages")
-  //       .add({
-  //     "text": message,
-  //     "sender": widget.otheruser.name, // Ensure proper sender identification
-  //     "timestamp": FieldValue.serverTimestamp(),
-  //   });
-  //   _mesagecontroller.clear();
-  // }
