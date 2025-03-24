@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Verification extends StatefulWidget {
   final String Phonenumber;
@@ -20,6 +21,9 @@ class _VerificationState extends State<Verification> {
 
   Future<void> verification() async {
     String phonenumber = _phoneController.text.trim();
+
+    final prefs=await SharedPreferences.getInstance();
+    await prefs.setString("phonenumber", phonenumber);
 
     if (phonenumber.isEmpty) {
       print("Fields cannot be empty");
@@ -54,15 +58,15 @@ class _VerificationState extends State<Verification> {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20.w),
+          padding: EdgeInsets.symmetric(horizontal: 16.w),
           child: Column(
             children: [
-              SizedBox(height: 100.h),
+              SizedBox(height: 79.h),
               Text(
                 "Enter Your Phone Number",
                 style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
               ),
-              SizedBox(height: 50.h),
+              SizedBox(height: 48.h),
               TextField(
                 controller: _phoneController,
                 decoration: InputDecoration(
@@ -84,7 +88,7 @@ class _VerificationState extends State<Verification> {
                   LengthLimitingTextInputFormatter(10),
                 ],
               ),
-              SizedBox(height: 50.h),
+              SizedBox(height: 81.h),
               Padding(
                 padding: EdgeInsets.only(
                     bottom: MediaQuery.of(context).viewInsets.bottom + 20.h),

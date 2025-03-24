@@ -29,7 +29,7 @@ class _OtpState extends State<Otp> {
           child: Column(
             children: [
               SizedBox(
-                height: 80.h,
+                height: 63.h,
               ),
               Center(
                 child: Text(
@@ -53,7 +53,7 @@ class _OtpState extends State<Otp> {
                 ),
               ),
               SizedBox(
-                height: 30.h,
+                height: 64.h,
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 60),

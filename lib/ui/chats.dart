@@ -1,13 +1,10 @@
-import 'package:chateo/ui/Contacts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class Chats extends StatefulWidget {
-  final Contacts otheruser;
   const Chats({
     super.key,
-    required this.otheruser,
   });
 
   @override
@@ -17,140 +14,132 @@ class Chats extends StatefulWidget {
 class _ChatsState extends State<Chats> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   TextEditingController _mesagecontroller = TextEditingController();
-  Contacts? currentuser;
-  Future<void> sendmessage(String? Contacts) async {
-    String message = _mesagecontroller.text.trim();
-
-    if (message.isEmpty) return;
-
-    if (Contacts == null || Contacts.isEmpty) {
-      print("Error: chatroomid is empty or null");
-
-      return;
-    }
-
-    await _firestore
-        .collection("user")
-        .doc("currentuser")
-        .collection("user")
-        .add({
-      "text": message,
-      "sender": widget.otheruser,
-      "timestamp": FieldValue.serverTimestamp(),
-    });
-    _mesagecontroller.clear();
-  }
+  final CollectionReference contactsRef =
+      FirebaseFirestore.instance.collection("user");
 
   @override
+  void dispose() {
+    _mesagecontroller.dispose();
+    super.dispose();
+  }
+
+  // Future<String?> _getImageUrl(String number) async {
+  //   final prefs = await SharedPreferences.getInstance();
+  //   String? imageUrl = prefs.getString('contact_image_$number');
+  //   if (imageUrl == null) {
+  //     DocumentSnapshot doc = await contactsRef.doc("contacts").get();
+  //     if (doc.exists) {
+  //       var contacts = (doc.data() as Map<String, dynamic>)['contacts'] ?? [];
+  //       var contact = contacts.firstWhere(
+  //         (c) => c['number'] == number,
+  //         orElse: () => null,
+  //       );
+  //       if (contact != null && contact['imageUrl'] != null) {
+  //         imageUrl = contact['imageUrl'];
+  //         await prefs.setString('contact_image_$number', imageUrl!);
+  //       }
+  //     }
+  //   }
+  //   return imageUrl;
+  // }
+
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: [
-          Padding(
-            padding: EdgeInsets.only(top: 40),
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                children: [
-                  Text(
-                    "Chats",
-                    style: TextStyle(fontSize: 25, color: Color(0xFF002DE3)),
-                  ),
-                  SizedBox(
-                    width: 240.w,
-                  ),
-                  IconButton(
-                      onPressed: () {},
-                      icon: Icon(
-                        Icons.message,
-                        color: Color(0xFF002DE3),
-                      )),
-                ],
-              ),
+        body: Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(top: 40),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Row(
+              children: [
+                const Text(
+                  "Chats",
+                  style: TextStyle(fontSize: 25, color: Color(0xFF002DE3)),
+                ),
+                SizedBox(width: 240.w),
+                IconButton(
+                  onPressed: () {},
+                  icon: const Icon(Icons.message, color: Color(0xFF002DE3)),
+                ),
+              ],
             ),
           ),
-
-//story/////////////////////
-
-          SizedBox(
-            height: 20.h,
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 25),
-            child: TextField(
-              controller: _mesagecontroller,
-              decoration: InputDecoration(
-                  hintText: "search",
-                  hintStyle: TextStyle(fontSize: 17),
-                  prefixIcon: Icon(Icons.search),
-                  fillColor: Colors.grey.shade200,
-                  filled: true,
-                  border: OutlineInputBorder(borderSide: BorderSide.none),
-                  focusedBorder:
-                      OutlineInputBorder(borderSide: BorderSide.none)),
+        ),
+        SizedBox(height: 20.h),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 25),
+          child: TextField(
+            decoration: InputDecoration(
+              hintText: "search",
+              hintStyle: const TextStyle(fontSize: 17),
+              prefixIcon: const Icon(Icons.search),
+              fillColor: Colors.grey.shade200,
+              filled: true,
+              border: const OutlineInputBorder(borderSide: BorderSide.none),
+              focusedBorder:
+                  const OutlineInputBorder(borderSide: BorderSide.none),
             ),
           ),
-
-          Expanded(
-              child: StreamBuilder(
-            stream: _firestore
-                .collection("user")
-                .doc(widget.otheruser.toString())
-                .collection("user")
-                .orderBy("timestamp", descending: true)
-                .snapshots(),
+        ),
+        Expanded(
+          child: StreamBuilder<DocumentSnapshot>(
+            stream: contactsRef.doc("contacts").snapshots(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(
-                  child: CircularProgressIndicator(),
-                );
-              } else if (snapshot.hasData || snapshot.data!.docs.isNotEmpty) {
-                return Center(
-                  child: Text("available Alla...."),
-                );
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (!snapshot.hasData || !snapshot.data!.exists) {
+                return const Center(child: Text("No contacts available"));
               }
 
-              var message = snapshot.data!.docs;
+              var contacts =
+                  (snapshot.data!.data() as Map<String, dynamic>)['contacts'] ??
+                      [];
 
               return ListView.builder(
-                itemCount: message.length,
+                itemCount: contacts.length,
                 itemBuilder: (context, index) {
-                  var messageData = message[index].data();
+                  var contact = contacts[index];
+                  String name = contact['name'] ?? 'No name';
+                  String number = contact['number'] ?? 'No number';
 
-                  return GestureDetector(
-                    onTap: () => openFullScreenDialog(
-                        context,
-                        _mesagecontroller,
-                        () => sendmessage(widget.otheruser.toString()),
-                        _firestore,
-                        widget.otheruser.name,
-                        widget.otheruser.number),
-                    child: ListTile(
-                      leading: CircleAvatar(
-                        child: Text(
-                          (messageData['userid'] != null &&
-                                  messageData['name'].isNotEmpty)
-                              ? messageData['name'][0].toUpperCase()
-                              : '?',
-                        ),
-                      ),
-                      title: Text(
-                        messageData['name'] ?? 'no name',
-                        style: TextStyle(fontSize: 20),
-                      ),
+                  return ListTile(
+                    leading: CircleAvatar(
+                      backgroundImage: contact.data != null
+                          ? NetworkImage(contact.data!)
+                          : null,
+                      child: contact.data == null
+                          ? Text(name.isNotEmpty ? name[0].toUpperCase() : '?')
+                          : null,
                     ),
+                    title: Text(
+                      name,
+                      style: const TextStyle(fontSize: 20),
+                    ),
+                    subtitle: Text(
+                      number,
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                    onTap: () {
+                      // Optionally navigate to a chat screen with messages subcollection
+                      // Navigator.push(context, MaterialPageRoute(builder: (context) => ChatDetail(chatnumber: number, username: name)));
+                    },
                   );
                 },
               );
             },
-          )),
-        ],
-      ),
-    );
+          ),
+        ),
+      ],
+    ));
   }
 }
 
-Future openFullScreenDialog(
+  
+
+
+Future openFullchatScreenDialog(
         BuildContext context,
         TextEditingController _mesagecontroller,
         Future<void> Function() sendmessage,
@@ -240,3 +229,25 @@ Future openFullScreenDialog(
         );
       },
     );
+
+
+
+
+  // Future<void> sendmessage(String chatroomid) async {
+  //   String message = _mesagecontroller.text.trim();
+  //   if (message.isEmpty) return;
+  //   if (chatroomid.isEmpty) {
+  //     print("Error: chatroomid is empty or null");
+  //     return;
+  //   }
+  //   await _firestore
+  //       .collection("user") // Ensure correct collection
+  //       .doc()
+  //       .collection("messages")
+  //       .add({
+  //     "text": message,
+  //     "sender": widget.otheruser.name, // Ensure proper sender identification
+  //     "timestamp": FieldValue.serverTimestamp(),
+  //   });
+  //   _mesagecontroller.clear();
+  // }

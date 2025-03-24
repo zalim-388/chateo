@@ -97,9 +97,9 @@ class _ContactsState extends State<Contacts> {
     //     .catchError((Error) => print(Error));
   }
 
-  Future<void> deletecontacts(
-    dynamic name,
-    dynamic number,
+  Future<void> deletecontact(
+    String name,
+    String number,
   ) async {
     return contactsRef
         .doc("contacts")
@@ -133,7 +133,6 @@ class _ContactsState extends State<Contacts> {
     }
   }
 
-  bool ShowDetails = false;
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
@@ -205,7 +204,7 @@ class _ContactsState extends State<Contacts> {
                             child: Text(
                               (contact['name'] != null &&
                                       contact['name'].isNotEmpty)
-                                  ? contact['name'][0].toUpperCase()
+                                  ? contact['name'][0]
                                   : '?',
                             ),
                           ),
@@ -220,9 +219,7 @@ class _ContactsState extends State<Contacts> {
                           // ),
 
                           trailing: SizedBox.shrink(),
-                          // onLongPress: () => deletecontacts(_namecontroller,
-                          //
-                          //   _namecontroller, _emailcontroller),
+
                           shape: Border(),
                           children: <Widget>[
                             Padding(
@@ -250,19 +247,34 @@ class _ContactsState extends State<Contacts> {
                                             color: Colors.green),
                                       ),
                                       IconButton(
-                                        onPressed: () {},
+                                        onPressed: () {
+                                          openFullchatScreenDialog(
+                                              context,
+                                              contact['name'],
+                                              contact['number'],
+                                              _namecontroller
+                                                  as FirebaseFirestore,
+                                              _phoneController as String,
+                                              Addcontact() as String);
+                                        },
                                         icon: Icon(Icons.message,
                                             color: Colors.blue),
                                       ),
                                       IconButton(
                                         onPressed: () {},
-                                        icon: Icon(Icons.video_call,
+                                        icon: Icon(Icons.video_call_outlined,
                                             color: Colors.purple),
                                       ),
+                                      // IconButton(
+                                      //   onPressed: () {},
+                                      //   icon: Icon(Icons.info,
+                                      //       color: Colors.black),
+                                      // ),
                                       IconButton(
-                                        onPressed: () {},
-                                        icon: Icon(Icons.info,
-                                            color: Colors.black),
+                                        onPressed: () => deletecontact(
+                                            contact['name'], contact['number']),
+                                        icon: Icon(Icons.delete,
+                                            color: Colors.redAccent),
                                       ),
                                     ],
                                   ),
@@ -355,7 +367,9 @@ Future openFullScreenDialog(
                       Row(
                         children: [
                           TextButton(
-                              onPressed: () {},
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
                               child: Text(
                                 "Cancel",
                                 style: TextStyle(
@@ -406,17 +420,6 @@ void save(
 ) {
   String name = _namecontroller.text.trim();
   String number = _phoneController.text.trim();
-
-  // if (name.isNotEmpty && number.isNotEmpty) {
-  //   Navigator.push(
-  //     context,
-  //     MaterialPageRoute(
-  //         builder: (
-  //       context,
-  //     ) =>
-  //             Chats(userid: name, chatroomid: number)),
-  //   );
-  // }
 
   Navigator.pop(context);
   _namecontroller.clear();

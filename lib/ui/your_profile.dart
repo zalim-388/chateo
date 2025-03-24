@@ -29,7 +29,6 @@ class _YourProfileState extends State<YourProfile> {
         profileImage = File(pickedFile.path);
       });
 
-      // Save image path to SharedPreferences
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('profile_image', pickedFile.path);
     }
@@ -38,35 +37,12 @@ class _YourProfileState extends State<YourProfile> {
   void saveProfileName() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('profile_name',
-        '${_Firstnamecontroller.text} ${_lastnamecontroller.text}');
-  }
-
-  void getdata() async {
-    final prefs = await SharedPreferences.getInstance();
-
-    final savename = await prefs.getString("profile_name");
-    final saveimage = await prefs.getString("profile_name");
-    if (savename != null) {
-      List<String> nameParts = savename.split(' ');
-      if (nameParts.isNotEmpty) {
-        setState(() {
-          _Firstnamecontroller.text = nameParts[0];
-          _lastnamecontroller.text = nameParts.length > 1 ? nameParts[1] : '';
-        });
-      }
-    }
-
-    if (saveimage != null) {
-      setState(() {
-        profileImage = File(saveimage);
-      });
-    }
+        '${_Firstnamecontroller.text.trim()} ${_lastnamecontroller.text.trim()}');
   }
 
   @override
   void initState() {
     super.initState();
-    getdata();
   }
 
   Widget build(BuildContext context) {
@@ -165,6 +141,7 @@ class _YourProfileState extends State<YourProfile> {
             GestureDetector(
               onTap: () {
                 saveProfileName();
+
                 Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -191,3 +168,25 @@ class _YourProfileState extends State<YourProfile> {
     );
   }
 }
+
+  // void getdata() async {
+  //   final prefs = await SharedPreferences.getInstance();
+
+  //   final savename = await prefs.getString("profile_name");
+  //   final saveimage = await prefs.getString("profile_image");
+  //   if (savename != null) {
+  //     final nameparts = savename.split('');
+  //     if (savename.isNotEmpty) {
+  //       setState(() {
+  //         _Firstnamecontroller.text = savename.split(" ")[0];
+  //         _lastnamecontroller.text = savename.split("")[1];
+  //       });
+  //     }
+  //   }
+
+  //   if (saveimage != null) {
+  //     setState(() {
+  //       profileImage = File(saveimage);
+  //     });
+  //   }
+  // }

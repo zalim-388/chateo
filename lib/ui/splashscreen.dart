@@ -16,28 +16,28 @@ class _SplashscreenState extends State<Splashscreen> {
       backgroundColor: Colors.white,
       body: Column(
         children: [
-          Container(
-            height: 271.h,
-            width: 262.w,
-          ),
-          Center(
-            child: Image.asset(
-              'assets/image/Illustration.png',
-              fit: BoxFit.contain,
-              height: 250.h,
-            ),
-          ),
           SizedBox(
-            height: 40.h,
+            height: 113.h,
+          ),
+          Container(
+              height: 271.h,
+              width: 262.w,
+              child: Image.asset(
+                'assets/image/Illustration.png',
+                fit: BoxFit.contain,
+                // height: 250.h,
+              )),
+          SizedBox(
+            height: 64.h,
           ),
           Center(
               child: Text(
             "    Connect easily with\n your family and friends\n         over countries",
             style: TextStyle(fontSize: 25, fontWeight: FontWeight.w800),
           )),
-            SizedBox(
-              height: 10.h,
-            ),
+          SizedBox(
+            height: 126.h,
+          ),
           Center(
               child: Text(
             "Terms & Privacy Policy",
@@ -45,8 +45,8 @@ class _SplashscreenState extends State<Splashscreen> {
               fontSize: 20,
             ),
           )),
-            SizedBox(
-            height:40.h,
+          SizedBox(
+            height: 18.h,
           ),
           GestureDetector(
             onTap: () {
@@ -60,7 +60,7 @@ class _SplashscreenState extends State<Splashscreen> {
               height: 52.h,
               width: 327.w,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(25),
                 color: Color(0xFF002DE3),
               ),
               alignment: Alignment.center,

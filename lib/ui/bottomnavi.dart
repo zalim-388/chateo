@@ -13,12 +13,14 @@ class Bottomnavi extends StatefulWidget {
 class _BottomnaviState extends State<Bottomnavi> {
   int currentPageIndex = 0;
 
-  final List<Widget> _bottom =[
-    Contacts(name: '', number: '', ),
-  Chats(otheruser: Contacts(name: '', number: '')),
-More(phonenumber: '',),
-
-];
+  final List<Widget> _bottom = [
+    Contacts(
+      name: '',
+      number: '',
+    ),
+    Chats(),
+    More(),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -46,9 +48,8 @@ More(phonenumber: '',),
               label: 'More'),
         ],
         currentIndex: currentPageIndex,
-        unselectedItemColor: Colors.grey
-        ,
-        selectedItemColor:Color(0xFF002DE3), 
+        unselectedItemColor: Colors.grey,
+        selectedItemColor: Color(0xFF002DE3),
         onTap: (Index) {
           setState(() {
             currentPageIndex = Index;
