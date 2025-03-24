@@ -100,3 +100,52 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
+// Future<void> _register(BuildContext context) async {
+//   try {
+//     UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+//       email: emailController.text.trim(),
+//       password: passwordController.text.trim(),
+//     );
+//     User? user = userCredential.user;
+//     if (user != null) {
+//       await user.sendEmailVerification();
+//       ScaffoldMessenger.of(context).showSnackBar(
+//         SnackBar(content: Text("Verification email sent to ${user.email}")),
+//       );
+//     }
+//   } catch (e) {
+//     print("Registration error: $e");
+//     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+//       content: Text("Registration failed: $e"),
+//     ));
+//   }
+// }
+
+// Future<void> _login(BuildContext context) async {
+//   try {
+//     UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+//       email: emailController.text.trim(),
+//       password: passwordController.text.trim(),
+//     );
+
+//     if (userCredential.user != null) {
+//       if (userCredential.user!.emailVerified) {
+//         print("User logged in: ${userCredential.user?.uid}");
+//         Navigator.pushReplacement(
+//           context,
+//           MaterialPageRoute(builder: (context) => YourProfile()),
+//         );
+//       } else {
+//         print("User's email is not verified");
+//         ScaffoldMessenger.of(context).showSnackBar(
+//           SnackBar(content: Text("Please verify your email before logging in.")),
+//         );
+//       }
+//     }
+//   } on FirebaseAuthException catch (e) {
+//     print("Login error: ${e.message}");
+//     ScaffoldMessenger.of(context).showSnackBar(
+//       SnackBar(content: Text("Login failed: ${e.message}")),
+//     );
+//   }
+// }
