@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:chateo/ui/chats.dart';
+import 'package:chateo/ui/chat_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -25,6 +25,7 @@ class _ContactsState extends State<Contacts> {
 
   final TextEditingController _namecontroller = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _mesagecontroller = TextEditingController();
 
   final CollectionReference contactsRef =
       FirebaseFirestore.instance.collection("user");
@@ -152,7 +153,8 @@ class _ContactsState extends State<Contacts> {
                   ),
                   IconButton(
                       onPressed: () {
-                        openFullchatScreenDialog;
+                        openFullScreenDialog(context, _phoneController,
+                            _namecontroller, Addcontact);
                       },
                       icon: Icon(
                         Icons.add,
@@ -249,15 +251,15 @@ class _ContactsState extends State<Contacts> {
                                       ),
                                       IconButton(
                                         onPressed: () {
-                                          openFullchatScreenDialog(
-                                              context,
-                                              contact['name'],
-                                              contact['number'],
-                                              FirebaseFirestore.instance,
-                                              // Add the missing arguments here
-                                              // For example:
-                                              'additionalArgument1',
-                                              'additionalArgument2');
+                                          Navigator.push(context,
+                                              MaterialPageRoute(
+                                            builder: (context) {
+                                              return ChatScreen(
+                                                name: contact['name'],
+                                                number: contact['number'],
+                                              );
+                                            },
+                                          ));
                                         },
                                         icon: Icon(Icons.message,
                                             color: Colors.blue),

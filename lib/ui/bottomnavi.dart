@@ -1,5 +1,5 @@
 import 'package:chateo/ui/Contacts.dart';
-import 'package:chateo/ui/chats.dart';
+import 'package:chateo/ui/home.dart';
 import 'package:chateo/ui/more.dart';
 import 'package:flutter/material.dart';
 
@@ -18,7 +18,10 @@ class _BottomnaviState extends State<Bottomnavi> {
       name: '',
       number: '',
     ),
-    Chats(),
+    Home(
+      name: '',
+      number: '',
+    ),
     More(),
   ];
 

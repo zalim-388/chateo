@@ -22,7 +22,7 @@ class _VerificationState extends State<Verification> {
   Future<void> verification() async {
     String phonenumber = _phoneController.text.trim();
 
-    final prefs=await SharedPreferences.getInstance();
+    final prefs = await SharedPreferences.getInstance();
     await prefs.setString("phonenumber", phonenumber);
 
     if (phonenumber.isEmpty) {
@@ -66,7 +66,12 @@ class _VerificationState extends State<Verification> {
                 "Enter Your Phone Number",
                 style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
               ),
-              SizedBox(height: 48.h),
+              SizedBox(height: 8.h),
+              Text(
+                "Please confirm your country code and enter\n                 your phone number",
+                style: TextStyle(fontSize: 17, fontWeight: FontWeight.w300),
+              ),
+              SizedBox(height: 45.h),
               TextField(
                 controller: _phoneController,
                 decoration: InputDecoration(
