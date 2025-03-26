@@ -26,7 +26,7 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   @override
-  void iniState() {
+  void initState() {
     super.initState();
     _messagecontroller = TextEditingController();
   }
@@ -51,7 +51,8 @@ class _ChatScreenState extends State<ChatScreen> {
       });
       _messagecontroller.clear();
     } catch (e) {
-      print("Error sending message  $e");
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text("Failed to send message: $e")));
     }
   }
 
@@ -70,7 +71,7 @@ class _ChatScreenState extends State<ChatScreen> {
                             number: widget.number,
                           )));
             },
-            icon: Icon(Icons.arrow_back_ios,color: Colors.white)),
+            icon: Icon(Icons.arrow_back_ios, color: Colors.white)),
         title: Row(
           children: [
             CircleAvatar(
@@ -81,16 +82,22 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
             Text(
               widget.name,
-              style: TextStyle(fontSize: 17,color: Colors.white),
+              style: TextStyle(fontSize: 17, color: Colors.white),
             ),
           ],
         ),
         actions: [
           Row(
             children: [
-              IconButton(onPressed: () {}, icon: Icon(Icons.videocam,color: Colors.white)),
-              IconButton(onPressed: () {}, icon: Icon(Icons.call,color: Colors.white)),
-              IconButton(onPressed: () {}, icon: Icon(Icons.more_vert,color: Colors.white)),
+              IconButton(
+                  onPressed: () {},
+                  icon: Icon(Icons.videocam, color: Colors.white)),
+              IconButton(
+                  onPressed: () {},
+                  icon: Icon(Icons.call, color: Colors.white)),
+              IconButton(
+                  onPressed: () {},
+                  icon: Icon(Icons.more_vert, color: Colors.white)),
             ],
           )
         ],
@@ -113,6 +120,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   child: CircularProgressIndicator(),
                 );
               }
+
               if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                 return Center(child: Text("No messages yet"));
               }
@@ -130,12 +138,12 @@ class _ChatScreenState extends State<ChatScreen> {
                     alignment:
                         isme ? Alignment.centerRight : Alignment.centerLeft,
                     child: Container(
-                    
                       padding: EdgeInsets.all(10),
                       margin: EdgeInsets.symmetric(horizontal: 5, vertical: 10),
                       decoration: BoxDecoration(
-                    
-                          color: isme ? Color.fromARGB(255, 56, 93, 241) : Colors.grey[300],
+                          color: isme
+                              ? Color.fromARGB(255, 56, 93, 241)
+                              : Colors.grey[300],
                           borderRadius: BorderRadius.circular(10)),
                       child: Column(
                         crossAxisAlignment: isme
@@ -143,8 +151,11 @@ class _ChatScreenState extends State<ChatScreen> {
                             : CrossAxisAlignment.start,
                         children: [
                           Text(
-                            message["text"]?? "No message",
-                            style: TextStyle(fontSize: 16,color: Colors.white),
+                            message["text"] ?? "No message",
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: isme ? Colors.white : Colors.black87,
+                            ),
                           ),
                           SizedBox(
                             height: 5.h,
@@ -155,7 +166,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                     (message["timestamp"] as Timestamp)
                                         .toDate())
                                 : "sending...",
-                            style: TextStyle(fontSize: 12,color: Colors.white),
+                            style: TextStyle(fontSize: 12, color: Colors.white),
                           )
                         ],
                       ),
