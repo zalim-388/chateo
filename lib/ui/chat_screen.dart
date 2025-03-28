@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ChatScreen extends StatefulWidget {
   final String name;
@@ -56,6 +57,13 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
+  void _makingphonecall() async {
+    var _url = Uri.parse("tel:${widget.name}");
+    if (await launchUrl(_url, mode: LaunchMode.externalApplication)) {
+      throw Exception("Could not launch $_url");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -93,7 +101,9 @@ class _ChatScreenState extends State<ChatScreen> {
                   onPressed: () {},
                   icon: Icon(Icons.videocam, color: Colors.white)),
               IconButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    _makingphonecall();
+                  },
                   icon: Icon(Icons.call, color: Colors.white)),
               IconButton(
                   onPressed: () {},
@@ -180,6 +190,15 @@ class _ChatScreenState extends State<ChatScreen> {
             padding: const EdgeInsets.all(10),
             child: Row(
               children: [
+                Transform.rotate(
+                    angle: 5.5,
+                    child: IconButton(
+                      onPressed: () {},
+                      icon: Icon(Icons.attach_file, color: Color(0xFF002DE3)),
+                    )),
+                SizedBox(
+                  width: 5.w,
+                ),
                 Expanded(
                   child: TextField(
                     controller: _messagecontroller,

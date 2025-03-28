@@ -77,7 +77,7 @@ class _HomeState extends State<Home> {
                   SizedBox(width: 230.w),
                   IconButton(
                     onPressed: () {},
-                    icon: const Icon(Icons.search, color: Color(0xFF002DE3)),
+                    icon: const Icon(Icons.camera_alt_outlined, color: Color(0xFF002DE3)),
                   ),
                 ],
               ),
