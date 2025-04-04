@@ -30,9 +30,7 @@ class _LoginScreenState extends State<LoginScreen> {
         Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => Verification(
-                Phonenumber: '',
-              ),
+              builder: (context) => Verification(),
             ));
       }
     } catch (e) {
@@ -77,9 +75,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => Verification(
-                        Phonenumber: '',
-                      ),
+                      builder: (context) => Verification(),
                     ));
               },
               child: Text("skip"))
@@ -113,7 +109,6 @@ class _LoginScreenState extends State<LoginScreen> {
               decoration: InputDecoration(
                 labelText: "Password",
                 border: OutlineInputBorder(
-                  
                     borderSide: BorderSide(
                   color: Color(0xFF002DE3),
                 )),
@@ -121,7 +116,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     borderSide: BorderSide(
                   color: Color(0xFF002DE3),
                 )),
-
                 fillColor: Colors.grey.shade200,
                 filled: true,
               ),

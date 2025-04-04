@@ -16,7 +16,7 @@ class _BottomnaviState extends State<Bottomnavi> {
   final List<Widget> _bottom = [
     Contacts(
       name: '',
-      number: '',
+      number: '', 
     ),
     Home(
       name: '',

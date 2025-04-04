@@ -1,9 +1,15 @@
+import 'dart:io';
+
+import 'package:chateo/ui/Verification.dart';
 import 'package:chateo/ui/home.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class ChatScreen extends StatefulWidget {
   final String name;
@@ -29,10 +35,11 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
-    _messagecontroller = TextEditingController();
   }
 
-  Future<void> sendmessage(String number, String name) async {
+  Future<void> sendmessage(
+    String number,
+  ) async {
     String message = _messagecontroller.text.trim();
     if (message.isEmpty) {
       print("Error: message is empty or null");
@@ -40,9 +47,9 @@ class _ChatScreenState extends State<ChatScreen> {
     }
     try {
       await _firestore
-          .collection("user") // or contactsRef
-          .doc("contacts")
-          .collection("chat")
+          .collection("users") // or contactsRef
+          .doc(number)
+          .collection("contacts")
           .doc(widget.number)
           .collection("messages")
           .add({
@@ -58,10 +65,63 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void _makingphonecall() async {
-    var _url = Uri.parse("tel:${widget.name}");
-    if (await launchUrl(_url, mode: LaunchMode.externalApplication)) {
+    var _url = Uri.parse("tel:${widget.number}");
+    if (!await launchUrl(_url, mode: LaunchMode.externalApplication)) {
       throw Exception("Could not launch $_url");
     }
+  }
+
+  File? imagefile;
+  Future<void> _pickImage(ImageSource source) async {
+    final ImagePicker picker = ImagePicker();
+
+    final XFile? pickedFile = await picker.pickImage(source: source);
+
+    if (pickedFile != null) {
+      setState(() {
+        imagefile = File(pickedFile.path);
+      });
+
+      final filename = DateTime.now().millisecondsSinceEpoch.toString();
+      final storageRef =
+          FirebaseStorage.instance.ref().child("images/$filename.jpg");
+
+      try {
+        await storageRef.putFile(imagefile!);
+        String downloadurl = await storageRef.getDownloadURL();
+
+        await _firestore
+            .collection("users")
+            .doc(widget.number)
+            .collection("messages")
+            .add({
+          "type": "image",
+          "imageUrl": downloadurl,
+          "sender": widget.number,
+          "timestamp": FieldValue.serverTimestamp(),
+        });
+      } catch (e) {}
+    }
+  }
+
+  void _showAttachmentDialog() async {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return SimpleDialog(
+          children: <Widget>[
+            SimpleDialogOption(
+              onPressed: () => _pickImage(ImageSource.gallery),
+              child: Icon(Icons.image_outlined),
+            ),
+            SimpleDialogOption(
+              onPressed: () => _pickImage(ImageSource.camera),
+              child: Icon(Icons.camera_alt_outlined),
+            )
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -144,40 +204,53 @@ class _ChatScreenState extends State<ChatScreen> {
 
                   bool isme = message["sender"] == widget.number;
 
-                  return Align(
-                    alignment:
-                        isme ? Alignment.centerRight : Alignment.centerLeft,
-                    child: Container(
-                      padding: EdgeInsets.all(10),
-                      margin: EdgeInsets.symmetric(horizontal: 5, vertical: 10),
-                      decoration: BoxDecoration(
-                          color: isme
-                              ? Color.fromARGB(255, 56, 93, 241)
-                              : Colors.grey[300],
-                          borderRadius: BorderRadius.circular(10)),
+                  return SingleChildScrollView(
+                    child: Align(
+                      alignment:
+                          isme ? Alignment.centerRight : Alignment.centerLeft,
                       child: Column(
-                        crossAxisAlignment: isme
-                            ? CrossAxisAlignment.end
-                            : CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            message["text"] ?? "No message",
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: isme ? Colors.white : Colors.black87,
+                          Container(
+                            padding: EdgeInsets.all(10),
+                            margin: EdgeInsets.symmetric(
+                                horizontal: 5, vertical: 10),
+                            decoration: BoxDecoration(
+                                color: isme
+                                    ? Color.fromARGB(255, 56, 93, 241)
+                                    : Colors.black,
+                                borderRadius: BorderRadius.circular(10)),
+                            child: Column(
+                              crossAxisAlignment: isme
+                                  ? CrossAxisAlignment.start
+                                  : CrossAxisAlignment.end,
+                              children: [
+                                Text(
+                                  message["text"] ?? "No message",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: isme ? Colors.white : Colors.black87,
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 5.h,
+                                ),
+                                Text(
+                                  message["timestamp"] != null
+                                      ? DateFormat("hh:mm").format(
+                                          (message["timestamp"] as Timestamp)
+                                              .toDate())
+                                      : "sending...",
+                                  style: TextStyle(
+                                      fontSize: 12, color: Colors.white),
+                                ),
+                                SizedBox(
+                                  height: 5.h,
+                                ),
+                                if (message["type"] == "image")
+                                  Image.network(message["imageUrl"])
+                              ],
                             ),
                           ),
-                          SizedBox(
-                            height: 5.h,
-                          ),
-                          Text(
-                            message["timestamp"] != null
-                                ? DateFormat("hh:mm").format(
-                                    (message["timestamp"] as Timestamp)
-                                        .toDate())
-                                : "sending...",
-                            style: TextStyle(fontSize: 12, color: Colors.white),
-                          )
                         ],
                       ),
                     ),
@@ -193,7 +266,9 @@ class _ChatScreenState extends State<ChatScreen> {
                 Transform.rotate(
                     angle: 5.5,
                     child: IconButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        _showAttachmentDialog();
+                      },
                       icon: Icon(Icons.attach_file, color: Color(0xFF002DE3)),
                     )),
                 SizedBox(
@@ -216,7 +291,9 @@ class _ChatScreenState extends State<ChatScreen> {
                   ),
                 ),
                 IconButton(
-                    onPressed: () => sendmessage(widget.number, widget.name),
+                    onPressed: () => sendmessage(
+                          widget.number,
+                        ),
                     icon: Icon(
                       Icons.send,
                       color: Color(0xFF002DE3),
