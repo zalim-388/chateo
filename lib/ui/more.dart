@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:chateo/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
@@ -56,7 +57,41 @@ class _MoreState extends State<More> {
     }
   }
 
+  void dispose() {
+    darkNotifier.dispose();
+    super.dispose();
+  }
+
+  Future<void> _showdialogtheme(bool isdark) async {
+    await showDialog(
+      context: context,
+      builder: (context) => SimpleDialog(
+        children: [
+          RadioListTile<bool>(
+            title: Text("dark"),
+            value: true,
+            groupValue: isdark,
+            onChanged: (value) {
+              darkNotifier.value = value!;
+              Navigator.pop(context);
+            },
+          ),
+          RadioListTile<bool>(
+            title: Text("white"),
+            value: false,
+            groupValue: isdark,
+            onChanged: (value) {
+              darkNotifier.value = value!;
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget build(BuildContext context) {
+    bool isdark = darkNotifier.value;
     return Scaffold(
       // appBar: AppBar(
       //   leading: Text(
@@ -140,14 +175,52 @@ class _MoreState extends State<More> {
             SizedBox(
               height: 90.h,
             ),
-            buildMenuItem(Icons.person_2_outlined, "Account"),
-            buildMenuItem(Icons.chat_bubble_outline_outlined, "Chats"),
-            buildMenuItem(Icons.wb_sunny_outlined, "Theme"),
-            buildMenuItem(Icons.notifications_none_outlined, "Notification"),
-            buildMenuItem(Icons.shield_outlined, "Privacy"),
-            buildMenuItem(Icons.insert_chart_outlined, "Data Usage"),
-            buildMenuItem(Icons.help_outline, "Help"),
-            buildMenuItem(Icons.mail_outline, "Invite Your Friends"),
+            buildMenuItem(
+              Icons.person_2_outlined,
+              "Account",
+              () {},
+            ),
+            buildMenuItem(
+              Icons.chat_bubble_outline_outlined,
+              "Chats",
+              () {},
+            ),
+            buildMenuItem(
+              Icons.wb_sunny_outlined,
+              "Theme",
+              () {
+                setState(() {
+                  _showdialogtheme(isdark);
+                });
+                print("clicked");
+              },
+            ),
+            buildMenuItem(
+              Icons.notifications_none_outlined,
+              "Notification",
+              () {},
+            ),
+            buildMenuItem(
+              Icons.shield_outlined,
+              "Privacy",
+              () {},
+            ),
+            buildMenuItem(
+              Icons.insert_chart_outlined,
+              "Data Usage",
+              () {},
+            ),
+            buildMenuItem(
+              Icons.help_outline,
+              "Help",
+              () {},
+            ),
+            buildMenuItem(
+              Icons.mail_outline,
+              "Invite Your Friends",
+              () {},
+            ),
+            
           ],
         ),
       ),
@@ -155,14 +228,18 @@ class _MoreState extends State<More> {
   }
 }
 
-Widget buildMenuItem(IconData icon, String title) {
+Widget buildMenuItem(
+  IconData icon,
+  String title,
+  dynamic onTap,
+) {
   return Padding(
     padding: const EdgeInsets.symmetric(vertical: 10),
     child: Row(
       children: [
         Icon(icon),
         SizedBox(
-          width: 10,
+          width: 10.w,
         ),
         Text(
           title,
@@ -170,10 +247,7 @@ Widget buildMenuItem(IconData icon, String title) {
         ),
         Spacer(),
         IconButton(
-            onPressed: () {
-              
-              print("clicked");
-            }, icon: Icon(Icons.arrow_forward_ios_outlined))
+            onPressed: onTap, icon: Icon(Icons.arrow_forward_ios_outlined))
       ],
     ),
   );

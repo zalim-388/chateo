@@ -3,11 +3,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
 
 class Verification extends StatefulWidget {
-  final String Phonenumber;
-  const Verification({super.key, required this.Phonenumber});
+  const Verification({
+    super.key,
+  });
 
   @override
   State<Verification> createState() => _VerificationState();
@@ -22,8 +23,8 @@ class _VerificationState extends State<Verification> {
   Future<void> verification() async {
     String phonenumber = _phoneController.text.trim();
 
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString("phonenumber", phonenumber);
+    // final prefs = await SharedPreferences.getInstance();
+    // await prefs.setString("phonenumber", phonenumber);
 
     if (phonenumber.isEmpty) {
       print("Fields cannot be empty");
@@ -31,7 +32,8 @@ class _VerificationState extends State<Verification> {
     }
 
     return users
-        .add({"Phonenumber": _phoneController.text})
+        .doc(phonenumber)
+        .set({"phonenumber": phonenumber})
         .then((value) => print("User Added"))
         .catchError((error) => print("Failed to add user: $error"));
   }
@@ -39,7 +41,10 @@ class _VerificationState extends State<Verification> {
   @override
   void initState() {
     super.initState();
-    _phoneController.text = widget.Phonenumber;
+
+
+    _phoneController.text = '';
+        print("phonenumber${''}");
   }
 
   void dispose() {
