@@ -1,9 +1,9 @@
+import 'package:chateo/ui/Contacts.dart';
 import 'package:chateo/ui/otp.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
 
 class Verification extends StatefulWidget {
   const Verification({
@@ -23,28 +23,29 @@ class _VerificationState extends State<Verification> {
   Future<void> verification() async {
     String phonenumber = _phoneController.text.trim();
 
-    // final prefs = await SharedPreferences.getInstance();
-    // await prefs.setString("phonenumber", phonenumber);
-
     if (phonenumber.isEmpty) {
       print("Fields cannot be empty");
       return;
     }
 
-    return users
-        .doc(phonenumber)
-        .set({"phonenumber": phonenumber})
-        .then((value) => print("User Added"))
-        .catchError((error) => print("Failed to add user: $error"));
+    DocumentReference docRef = users.doc(phonenumber);
+    DocumentSnapshot docSnapshot = await docRef.get();
+
+    print("User Added: $phonenumber");
+
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => Contacts(name: '', number: phonenumber),
+        ));
   }
 
   @override
   void initState() {
     super.initState();
 
-
     _phoneController.text = '';
-        print("phonenumber${''}");
+    print("phonenumber${''}");
   }
 
   void dispose() {

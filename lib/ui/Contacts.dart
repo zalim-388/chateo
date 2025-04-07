@@ -28,13 +28,16 @@ class _ContactsState extends State<Contacts> {
   final TextEditingController _mesagecontroller = TextEditingController();
 
   final CollectionReference contactsRef =
-      FirebaseFirestore.instance.collection("user");
+      FirebaseFirestore.instance.collection("users");
+  late DocumentReference contactsRefDoc;
   @override
   void initState() {
     super.initState();
     _namecontroller.text = widget.name;
     _phoneController.text = widget.number;
+    contactsRefDoc = contactsRef.doc(widget.number);
 
+    print("phonenumber${widget.number}");
     fetchContacts();
   }
 
@@ -42,6 +45,7 @@ class _ContactsState extends State<Contacts> {
   void dispose() {
     _namecontroller.dispose();
     _phoneController.dispose();
+    contactsRefDoc = contactsRef.doc(widget.number);
 
     super.dispose();
   }
@@ -50,13 +54,13 @@ class _ContactsState extends State<Contacts> {
     String name = _namecontroller.text.trim();
     String number = _phoneController.text.trim();
 
-    DocumentReference docRef = contactsRef.doc("contacts");
+    // DocumentReference docRef = contactsRef.doc(widget.number);
 
     try {
-      DocumentSnapshot docshapshot = await docRef.get();
+      DocumentSnapshot docshapshot = await contactsRefDoc.get();
 
       if (docshapshot.exists) {
-        await docRef.update({
+        await contactsRefDoc.update({
           "contacts": FieldValue.arrayUnion([
             {
               "name": name,
@@ -65,7 +69,7 @@ class _ContactsState extends State<Contacts> {
           ])
         });
       } else {
-        await docRef.set({
+        await contactsRefDoc.set({
           "contacts": [
             {
               "name": name,
@@ -119,7 +123,8 @@ class _ContactsState extends State<Contacts> {
   List<Map<String, dynamic>> contactList = []; // Store contacts in a list
 
   Future<void> fetchContacts() async {
-    DocumentSnapshot documentSnapshot = await contactsRef.doc("contacts").get();
+    DocumentSnapshot documentSnapshot =
+        await contactsRef.doc(widget.number).get();
 
     if (documentSnapshot.exists) {
       var data = documentSnapshot.data() as Map<String, dynamic>;
