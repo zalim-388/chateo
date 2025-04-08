@@ -100,7 +100,9 @@ class _OtpState extends State<Otp> {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => YourProfile(),
+                              builder: (context) => YourProfile(
+                                phonenumber: widget.phonenumber,
+                              ),
                             ));
                       },
                       child: Icon(

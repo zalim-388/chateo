@@ -160,7 +160,7 @@ class _MoreState extends State<More> {
                   ],
                 ),
                 SizedBox(
-                  width: 150.w,
+                  width: 130.w,
                 ),
                 IconButton(
                     onPressed: () {},
@@ -220,7 +220,6 @@ class _MoreState extends State<More> {
               "Invite Your Friends",
               () {},
             ),
-            
           ],
         ),
       ),

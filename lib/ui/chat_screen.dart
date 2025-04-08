@@ -1,20 +1,23 @@
 import 'dart:io';
 
-import 'package:chateo/ui/Verification.dart';
 import 'package:chateo/ui/home.dart';
+import 'package:chateo/utils/helpers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 
 class ChatScreen extends StatefulWidget {
   final String name;
-  final String number;
-  const ChatScreen({super.key, required this.name, required this.number});
+  final String number; // Current user
+  final String receiverNumber; //Contact
+  const ChatScreen(
+      {super.key,
+      required this.name,
+      required this.number,
+      required this.receiverNumber});
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -34,6 +37,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   void initState() {
+    _messagecontroller.text = '';
     super.initState();
   }
 
@@ -48,26 +52,34 @@ class _ChatScreenState extends State<ChatScreen> {
     try {
       await _firestore
           .collection("users") // or contactsRef
-          .doc(number)
-          .collection("contacts")
           .doc(widget.number)
-          .collection("messages")
+          .collection("contacts")
+          .doc(widget.receiverNumber)
+          .collection("chat")
           .add({
         "text": message,
         "sender": widget.number,
+        "receiver": widget.receiverNumber,
         "timestamp": FieldValue.serverTimestamp(),
       });
+
+      // await _firestore
+      //     .collection("users")
+      //     .doc(widget.receiverNumber)
+      //     .collection("contacts")
+      //     .doc(widget.number)
+      //     .collection("chat")
+      //     .add({
+      //   "text": message,
+      //   "sender": widget.number,
+      //   "receiver": widget.receiverNumber,
+      //   "timestamp": FieldValue.serverTimestamp(),
+      // });
+
       _messagecontroller.clear();
     } catch (e) {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text("Failed to send message: $e")));
-    }
-  }
-
-  void _makingphonecall() async {
-    var _url = Uri.parse("tel:${widget.number}");
-    if (!await launchUrl(_url, mode: LaunchMode.externalApplication)) {
-      throw Exception("Could not launch $_url");
     }
   }
 
@@ -93,12 +105,27 @@ class _ChatScreenState extends State<ChatScreen> {
         await _firestore
             .collection("users")
             .doc(widget.number)
-            .collection("messages")
+            .collection("contacts")
+            .doc(widget.receiverNumber)
+            .collection("chat")
             .add({
           "type": "image",
           "imageUrl": downloadurl,
           "sender": widget.number,
           "timestamp": FieldValue.serverTimestamp(),
+        });
+
+        await _firestore
+            .collection("users")
+            .doc(widget.receiverNumber)
+            .collection("contacts")
+            .doc(widget.number)
+            .collection("chat")
+            .add({
+          "type": "image",
+          "imageUrl": downloadurl,
+          "sender": widget.receiverNumber,
+          "timestamp": FieldValue.serverTimestamp()
         });
       } catch (e) {}
     }
@@ -162,12 +189,28 @@ class _ChatScreenState extends State<ChatScreen> {
                   icon: Icon(Icons.videocam, color: Colors.white)),
               IconButton(
                   onPressed: () {
-                    _makingphonecall();
+                    makingphonecall(widget.receiverNumber);
                   },
                   icon: Icon(Icons.call, color: Colors.white)),
-              IconButton(
-                  onPressed: () {},
-                  icon: Icon(Icons.more_vert, color: Colors.white)),
+              PopupMenuButton(
+                color: Colors.white,
+                itemBuilder: (context) {
+                  return [
+                    PopupMenuItem(
+                      value: 'option1',
+                      child: Text('Option 1'),
+                    ),
+                    PopupMenuItem(
+                      value: 'option2',
+                      child: Text('Option 2'),
+                    ),
+                    PopupMenuItem(
+                      value: 'option3',
+                      child: Text('Option 3'),
+                    ),
+                  ];
+                },
+              )
             ],
           )
         ],
@@ -177,11 +220,11 @@ class _ChatScreenState extends State<ChatScreen> {
           Expanded(
               child: StreamBuilder<QuerySnapshot>(
             stream: _firestore
-                .collection("user")
-                .doc('contacts')
-                .collection("chat")
+                .collection("users")
                 .doc(widget.number)
-                .collection("messages")
+                .collection("contacts")
+                .doc(widget.receiverNumber)
+                .collection("chat")
                 .orderBy("timestamp", descending: true)
                 .snapshots(),
             builder: (context, snapshot) {

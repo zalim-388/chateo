@@ -7,8 +7,10 @@ import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class YourProfile extends StatefulWidget {
+  final String phonenumber;
   const YourProfile({
     super.key,
+    required this.phonenumber,
   });
 
   @override
@@ -145,7 +147,9 @@ class _YourProfileState extends State<YourProfile> {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => Bottomnavi(),
+                      builder: (context) => Bottomnavi(
+                        number: widget.phonenumber,
+                      ),
                     ));
               },
               child: Container(

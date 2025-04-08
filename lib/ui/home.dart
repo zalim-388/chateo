@@ -1,12 +1,15 @@
 import 'package:chateo/ui/chat_screen.dart';
+import 'package:chateo/utils/helpers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
 class Home extends StatefulWidget {
   final String name;
   final String number;
+
   const Home({
     super.key,
     required this.name,
@@ -32,24 +35,31 @@ class _HomeState extends State<Home> {
     List<Map<String, dynamic>> chattedUsers = [];
 
     for (var contact in contacts) {
-      var chatQuery = await _firestore
-          .collection("user")
-          .doc("contacts")
-          .collection("chat") // Fixed to match ChatScreen
-          .doc(contact['number'] as String? ?? '')
-          .collection("messages")
-          .orderBy("timestamp", descending: true)
-          .limit(1)
-          .get();
+      final String number = contact['number'] ?? "";
+      final String name = contact['name'] ?? "";
+      if (number.isEmpty) continue;
+      try {
+        var chatQuery = await _firestore
+            .collection("users")
+            .doc(widget.number)
+            .collection("contacts")
+            .doc(number)
+            .collection("chat")
+            .orderBy("timestamp", descending: true)
+            .limit(1)
+            .get();
 
-      if (chatQuery.docs.isNotEmpty) {
-        var lastMessage = chatQuery.docs.first.data();
-        chattedUsers.add({
-          "name": contact['name'] as String? ?? 'Unknown',
-          "number": contact['number'] as String? ?? '',
-          "lastmessage": lastMessage['text'] as String? ?? 'No message',
-          "lastTimestamp": (lastMessage['timestamp'] as Timestamp?)?.toDate(),
-        });
+        if (chatQuery.docs.isNotEmpty) {
+          var lastMessage = chatQuery.docs.first.data();
+          chattedUsers.add({
+            "name": contact['name'] as String? ?? 'Unknown',
+            "number": contact['number'] as String? ?? '',
+            "lastmessage": lastMessage['text'] as String? ?? 'No message',
+            "lastTimestamp": (lastMessage['timestamp'] as Timestamp?)?.toDate(),
+          });
+        }
+      } catch (e) {
+        print("Error fetching messages for $number: $e");
       }
     }
 
@@ -76,8 +86,11 @@ class _HomeState extends State<Home> {
                   ),
                   SizedBox(width: 230.w),
                   IconButton(
-                    onPressed: () {},
-                    icon: const Icon(Icons.camera_alt_outlined, color: Color(0xFF002DE3)),
+                    onPressed: () {
+                      pickImage(ImageSource.camera);
+                    },
+                    icon: const Icon(Icons.camera_alt_outlined,
+                        color: Color(0xFF002DE3)),
                   ),
                 ],
               ),
@@ -105,8 +118,12 @@ class _HomeState extends State<Home> {
           ),
           SizedBox(height: 20.h),
           Expanded(
-            child: StreamBuilder<DocumentSnapshot>(
-              stream: _firestore.collection('user').doc("contacts").snapshots(),
+            child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+              stream: _firestore
+                  .collection("users")
+                  .doc(widget.number)
+                  .collection("contacts")
+                  .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
@@ -114,14 +131,13 @@ class _HomeState extends State<Home> {
                 if (snapshot.hasError) {
                   return Center(child: Text("Error: ${snapshot.error}"));
                 }
-                if (!snapshot.hasData || !snapshot.data!.exists) {
-                  // Fixed logic
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                   return const Center(child: Text("No chats available"));
                 }
 
-                var contactsData =
-                    snapshot.data!.data() as Map<String, dynamic>;
-                List<dynamic> contacts = contactsData['contacts'] ?? [];
+                List<dynamic> contacts = snapshot.data!.docs.map((doc) {
+                  return doc.data();
+                }).toList();
 
                 return FutureBuilder<List<Map<String, dynamic>>>(
                   future: _fetchChattedUsers(contacts),
@@ -186,7 +202,8 @@ class _HomeState extends State<Home> {
                               MaterialPageRoute(
                                 builder: (context) => ChatScreen(
                                   name: user['name'],
-                                  number: user['number'],
+                                  number: widget.number,
+                                  receiverNumber: user['number'],
                                 ),
                               ),
                             );
