@@ -4,7 +4,8 @@ import 'package:chateo/ui/more.dart';
 import 'package:flutter/material.dart';
 
 class Bottomnavi extends StatefulWidget {
-  const Bottomnavi({super.key});
+  final String number;
+  const Bottomnavi({super.key, required this.number});
 
   @override
   State<Bottomnavi> createState() => _BottomnaviState();
@@ -13,17 +14,23 @@ class Bottomnavi extends StatefulWidget {
 class _BottomnaviState extends State<Bottomnavi> {
   int currentPageIndex = 0;
 
-  final List<Widget> _bottom = [
-    Contacts(
-      name: '',
-      number: '', 
-    ),
-    Home(
-      name: '',
-      number: '',
-    ),
-    More(),
-  ];
+  late final List<Widget> _bottom;
+
+  @override
+  void initState() {
+    super.initState();
+    _bottom = [
+      Contacts(
+        name: '',
+        number: widget.number,
+      ),
+      Home(
+        name: '',
+        number: widget.number,
+      ),
+      More(),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {

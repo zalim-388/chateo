@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:chateo/ui/chat_screen.dart';
+import 'package:chateo/utils/helpers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -29,14 +30,15 @@ class _ContactsState extends State<Contacts> {
 
   final CollectionReference contactsRef =
       FirebaseFirestore.instance.collection("users");
-  late DocumentReference contactsRefDoc;
+
   @override
   void initState() {
     super.initState();
+    if (widget.number.trim().isEmpty) {
+      print("Error: widget.number is empty!");
+    }
     _namecontroller.text = widget.name;
     _phoneController.text = widget.number;
-    contactsRefDoc = contactsRef.doc(widget.number);
-
     print("phonenumber${widget.number}");
     fetchContacts();
   }
@@ -45,97 +47,91 @@ class _ContactsState extends State<Contacts> {
   void dispose() {
     _namecontroller.dispose();
     _phoneController.dispose();
-    contactsRefDoc = contactsRef.doc(widget.number);
 
     super.dispose();
   }
 
-  Future<void> Addcontact() async {
+  Future<void> addContact() async {
     String name = _namecontroller.text.trim();
     String number = _phoneController.text.trim();
 
-    // DocumentReference docRef = contactsRef.doc(widget.number);
+    if (widget.number.isEmpty) {
+      print("Error: widget.number is empty!");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Phone number is missing for user")),
+      );
+      return;
+    }
+
+    DocumentReference docRef = contactsRef.doc(widget.number);
 
     try {
-      DocumentSnapshot docshapshot = await contactsRefDoc.get();
-
-      if (docshapshot.exists) {
-        await contactsRefDoc.update({
+      DocumentSnapshot docSnapshot = await docRef.get();
+      if (docSnapshot.exists) {
+        await docRef.update({
           "contacts": FieldValue.arrayUnion([
-            {
-              "name": name,
-              "number": number,
-            }
+            {"name": name, "number": number}
           ])
         });
       } else {
-        await contactsRefDoc.set({
+        await docRef.set({
           "contacts": [
-            {
-              "name": name,
-              "number": number,
-            }
+            {"name": name, "number": number}
           ]
         });
       }
-      ;
-
-      print("Contact add sucessfully");
+      print("Contact added successfully");
     } catch (error) {
-      print("Error Adding Contact $error");
+      print("Error adding contact: $error");
     }
-
-    // return contactsRef
-    //     .doc("contacts")
-    //     .update({
-    //       "contacts": FieldValue.arrayUnion([
-    //         {"name": name, "number": number, "email": email}
-    //       ])
-    //     })
-    //     .then((value) => print(" Add user"))
-    //     .catchError((Error) => print(Error));
-
-    // return contactsRef
-
-    //     .add({"name": name, "number": number})
-    //     .then((value) => print("add user"))
-    //     .catchError((Error) => print(Error));
   }
 
-  Future<void> deletecontact(
-    String name,
-    String number,
-  ) async {
-    return contactsRef
-        .doc("contacts")
-        .update({
-          "contacts": FieldValue.arrayRemove([
-            {
-              "name": name,
-              "number": number,
-            }
-          ])
-        })
-        .then((value) => print("User Deleted"))
-        .catchError((error) => print("Failed to delete user: $error"));
+  Future<void> deleteContact(String name, String number) async {
+    if (widget.number.isEmpty) {
+      print("Error: widget.number is empty");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text("Something went wrong. Please restart the app.")),
+      );
+      return;
+    }
+
+    try {
+      await contactsRef.doc(widget.number).update({
+        "contacts": FieldValue.arrayRemove([
+          {"name": name, "number": number}
+        ])
+      });
+      print("User Deleted");
+    } catch (error) {
+      print("Failed to delete user: $error");
+    }
   }
 
   List<Map<String, dynamic>> contactList = []; // Store contacts in a list
-
   Future<void> fetchContacts() async {
-    DocumentSnapshot documentSnapshot =
-        await contactsRef.doc(widget.number).get();
+    if (widget.number.isEmpty) {
+      print("Error: widget.number is empty");
+      return;
+    }
 
-    if (documentSnapshot.exists) {
-      var data = documentSnapshot.data() as Map<String, dynamic>;
-      setState(() {
-        contactList = List<Map<String, dynamic>>.from(data["contacts"] ?? []);
-      });
-    } else {
-      print("Document does not exist");
-      setState(() {
-        contactList = [];
-      });
+    try {
+      DocumentSnapshot documentSnapshot =
+          await contactsRef.doc(widget.number).get();
+
+      if (documentSnapshot.exists) {
+        var data = documentSnapshot.data() as Map<String, dynamic>;
+        setState(() {
+          contactList = List<Map<String, dynamic>>.from(data["contacts"] ?? []);
+        });
+      } else {
+        print("Document does not exist");
+        setState(() {
+          contactList = [];
+        });
+      }
+    } catch (error) {
+      print("Error fetching contacts: $error");
     }
   }
 
@@ -159,7 +155,7 @@ class _ContactsState extends State<Contacts> {
                   IconButton(
                       onPressed: () {
                         openFullScreenDialog(context, _phoneController,
-                            _namecontroller, Addcontact);
+                            _namecontroller, addContact);
                       },
                       icon: Icon(
                         Icons.add,
@@ -188,7 +184,7 @@ class _ContactsState extends State<Contacts> {
           ),
           Expanded(
               child: StreamBuilder<DocumentSnapshot>(
-                  stream: contactsRef.doc("contacts").snapshots(),
+                  stream: contactsRef.doc(widget.number).snapshots(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return Center(
@@ -250,7 +246,9 @@ class _ContactsState extends State<Contacts> {
                                         MainAxisAlignment.spaceEvenly,
                                     children: [
                                       IconButton(
-                                        onPressed: () {},
+                                        onPressed: () {
+                                          makingphonecall(contact['number']);
+                                        },
                                         icon: Icon(Icons.call,
                                             color: Colors.green),
                                       ),
@@ -261,7 +259,9 @@ class _ContactsState extends State<Contacts> {
                                             builder: (context) {
                                               return ChatScreen(
                                                 name: contact['name'],
-                                                number: contact['number'],
+                                                receiverNumber:
+                                                    contact['number'],
+                                                number: widget.number,
                                               );
                                             },
                                           ));
@@ -280,7 +280,7 @@ class _ContactsState extends State<Contacts> {
                                       //       color: Colors.black),
                                       // ),
                                       IconButton(
-                                        onPressed: () => deletecontact(
+                                        onPressed: () => deleteContact(
                                             contact['name'], contact['number']),
                                         icon: Icon(Icons.delete,
                                             color: Colors.redAccent),
@@ -434,3 +434,18 @@ void save(
   _namecontroller.clear();
   _phoneController.clear();
 }
+    // return contactsRef
+    //     .doc("contacts")
+    //     .update({
+    //       "contacts": FieldValue.arrayUnion([
+    //         {"name": name, "number": number, "email": email}
+    //       ])
+    //     })
+    //     .then((value) => print(" Add user"))
+    //     .catchError((Error) => print(Error));
+
+    // return contactsRef
+
+    //     .add({"name": name, "number": number})
+    //     .then((value) => print("add user"))
+    //     .catchError((Error) => print(Error));

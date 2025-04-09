@@ -1,4 +1,3 @@
-import 'package:chateo/ui/Contacts.dart';
 import 'package:chateo/ui/otp.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -6,9 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class Verification extends StatefulWidget {
-  const Verification({
-    super.key,
-  });
+  const Verification({super.key});
 
   @override
   State<Verification> createState() => _VerificationState();
@@ -16,7 +13,8 @@ class Verification extends StatefulWidget {
 
 class _VerificationState extends State<Verification> {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
-  CollectionReference users = FirebaseFirestore.instance.collection("users");
+  final CollectionReference users =
+      FirebaseFirestore.instance.collection("users");
 
   final TextEditingController _phoneController = TextEditingController();
 
@@ -27,40 +25,61 @@ class _VerificationState extends State<Verification> {
       print("Fields cannot be empty");
       return;
     }
+    //    if (phonenumber.isEmpty || phonenumber.length != 10) {
+    //   print("Please enter a valid 10-digit phone number.");
+    //   return;
+    // }
 
-    DocumentReference docRef = users.doc(phonenumber);
-    DocumentSnapshot docSnapshot = await docRef.get();
+    try {
+      DocumentReference docRef = users.doc(phonenumber);
+      DocumentSnapshot docSnapshot = await docRef.get();
 
-    print("User Added: $phonenumber");
+      if (!docSnapshot.exists) {
+        await docRef.set({
+          'contacts': [],
+        });
+        print("New user created: $phonenumber");
+      } else {
+        print("User already exists: $phonenumber");
+      }
 
-    Navigator.push(
+      // Navigator.push(
+      //   context,
+      //   MaterialPageRoute(
+      //     builder: (context) => Contacts(name: '', number: phonenumber.trim()),
+      //   ),
+      // );
+      Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => Contacts(name: '', number: phonenumber),
-        ));
+          builder: (context) => Otp(phonenumber: _phoneController.text.trim()),
+        ),
+      );
+    } catch (e) {
+      print("Error during verification: $e");
+    }
   }
 
   @override
   void initState() {
     super.initState();
-
     _phoneController.text = '';
-    print("phonenumber${''}");
   }
 
+  @override
   void dispose() {
     _phoneController.dispose();
     super.dispose();
   }
 
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            icon: Icon(Icons.arrow_back_ios)),
+          onPressed: () => Navigator.pop(context),
+          icon: Icon(Icons.arrow_back_ios),
+        ),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -76,6 +95,7 @@ class _VerificationState extends State<Verification> {
               Text(
                 "Please confirm your country code and enter\n                 your phone number",
                 style: TextStyle(fontSize: 17, fontWeight: FontWeight.w300),
+                textAlign: TextAlign.center,
               ),
               SizedBox(height: 45.h),
               TextField(
@@ -86,37 +106,26 @@ class _VerificationState extends State<Verification> {
                   hintText: "Phone Number",
                   hintStyle: TextStyle(fontSize: 20),
                   border: OutlineInputBorder(
-                      borderSide: BorderSide(
-                    color: Color(0xFF002DE3),
-                  )),
+                    borderSide: BorderSide(color: Color(0xFF002DE3)),
+                  ),
                   focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                    color: Color(0xFF002DE3),
-                  )),
+                    borderSide: BorderSide(color: Color(0xFF002DE3)),
+                  ),
                 ),
                 keyboardType: TextInputType.number,
                 inputFormatters: [
                   LengthLimitingTextInputFormatter(10),
+                  FilteringTextInputFormatter.digitsOnly,
                 ],
               ),
               SizedBox(height: 81.h),
               Padding(
                 padding: EdgeInsets.only(
-                    bottom: MediaQuery.of(context).viewInsets.bottom + 20.h),
+                  bottom: MediaQuery.of(context).viewInsets.bottom + 20.h,
+                ),
                 child: GestureDetector(
                   onTap: () async {
                     await verification();
-                    String Phonenumber = _phoneController.text;
-                    print("phonenumber${Phonenumber}");
-
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => Otp(
-                          phonenumber: _phoneController.text.trim(),
-                        ),
-                      ),
-                    );
                   },
                   child: Container(
                     height: 52.h,
