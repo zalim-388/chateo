@@ -43,12 +43,6 @@ class _VerificationState extends State<Verification> {
         print("User already exists: $phonenumber");
       }
 
-      // Navigator.push(
-      //   context,
-      //   MaterialPageRoute(
-      //     builder: (context) => Contacts(name: '', number: phonenumber.trim()),
-      //   ),
-      // );
       Navigator.push(
         context,
         MaterialPageRoute(

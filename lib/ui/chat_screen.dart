@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:chateo/ui/bottomnavi.dart';
 import 'package:chateo/ui/home.dart';
 import 'package:chateo/utils/helpers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -161,8 +162,7 @@ class _ChatScreenState extends State<ChatScreen> {
               Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => Home(
-                            name: widget.name,
+                      builder: (context) => Bottomnavi(
                             number: widget.number,
                           )));
             },
@@ -193,20 +193,20 @@ class _ChatScreenState extends State<ChatScreen> {
                   },
                   icon: Icon(Icons.call, color: Colors.white)),
               PopupMenuButton(
-                color: Colors.white,
+                iconColor: Colors.white,
                 itemBuilder: (context) {
                   return [
                     PopupMenuItem(
-                      value: 'option1',
-                      child: Text('Option 1'),
+                      value: "Report",
+                      child: Text('Report'),
                     ),
                     PopupMenuItem(
-                      value: 'option2',
-                      child: Text('Option 2'),
+                      value: 'block',
+                      child: Text('block'),
                     ),
                     PopupMenuItem(
-                      value: 'option3',
-                      child: Text('Option 3'),
+                      value: 'clear chat',
+                      child: Text('clear chat'),
                     ),
                   ];
                 },
