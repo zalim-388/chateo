@@ -93,6 +93,8 @@ class _MoreState extends State<More> {
   Widget build(BuildContext context) {
     bool isdark = darkNotifier.value;
     return Scaffold(
+      backgroundColor: Colors.white,
+
       // appBar: AppBar(
       //   leading: Text(
       //     "More",

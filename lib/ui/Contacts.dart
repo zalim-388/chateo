@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:chateo/ui/chat_screen.dart';
 import 'package:chateo/utils/helpers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:country_picker/country_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -27,6 +28,8 @@ class _ContactsState extends State<Contacts> {
   final TextEditingController _namecontroller = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _mesagecontroller = TextEditingController();
+    Country? selectedCountry;
+
 
   final CollectionReference contactsRef =
       FirebaseFirestore.instance.collection("users");
@@ -34,9 +37,7 @@ class _ContactsState extends State<Contacts> {
   @override
   void initState() {
     super.initState();
-    if (widget.number.trim().isEmpty) {
-      print("Error: widget.number is empty!");
-    }
+
     _namecontroller.text = widget.name;
     _phoneController.text = widget.number;
     print("phonenumber${widget.number}");
@@ -137,6 +138,7 @@ class _ContactsState extends State<Contacts> {
 
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Column(
         children: [
           Padding(
@@ -154,6 +156,8 @@ class _ContactsState extends State<Contacts> {
                   ),
                   IconButton(
                       onPressed: () {
+                        _namecontroller.clear();
+                        _phoneController.clear();
                         openFullScreenDialog(context, _phoneController,
                             _namecontroller, addContact);
                       },
@@ -353,11 +357,13 @@ Future openFullScreenDialog(
                       TextField(
                         controller: phoneController,
                         decoration: InputDecoration(
-                          prefixIcon: Icon(
-                            Icons.call,
-                            color: Color(0xFF002DE3),
-                            size: 25,
-                          ),
+                          // prefixIcon: Icon(
+                          //   Icons.call,
+                          //   color: Color(0xFF002DE3),
+                          //   size: 25,
+                          
+                          // ),
+                          
                           hintText: "Phone",
                           hintStyle: TextStyle(fontSize: 17),
                           border: OutlineInputBorder(
@@ -368,6 +374,34 @@ Future openFullScreenDialog(
                               borderSide: BorderSide.none),
                           fillColor: Colors.grey.shade300,
                           filled: true,
+
+      prefixIcon: GestureDetector(
+                          onTap: () {
+                            showCountryPicker(
+                              context: context,
+                              showPhoneCode: true,
+                              onSelect: (Country country) {
+                                setState(() {
+                                  selectedCountry = country;
+                                });
+                              },
+                            );
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 15),
+                            child: Text(
+                              selectedCountry != null
+                                  ? "+${selectedCountry!.phoneCode}"
+                                  : "+91", // default
+                              style:
+                                  TextStyle(fontSize: 16, color: Colors.black),
+                            ),
+                          ),
+                        ),
+
+
+
                         ),
                         keyboardType: TextInputType.number,
                         inputFormatters: [LengthLimitingTextInputFormatter(10)],

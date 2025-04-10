@@ -1,7 +1,7 @@
 import 'package:chateo/ui/otp.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:country_picker/country_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class Verification extends StatefulWidget {
@@ -18,6 +18,8 @@ class _VerificationState extends State<Verification> {
 
   final TextEditingController _phoneController = TextEditingController();
 
+  Country? selectedCountry;
+
   Future<void> verification() async {
     String phonenumber = _phoneController.text.trim();
 
@@ -25,28 +27,31 @@ class _VerificationState extends State<Verification> {
       print("Fields cannot be empty");
       return;
     }
-    //    if (phonenumber.isEmpty || phonenumber.length != 10) {
-    //   print("Please enter a valid 10-digit phone number.");
-    //   return;
-    // }
+    if (phonenumber.isEmpty || phonenumber.length != 10) {
+      print("Please enter a valid 10-digit phone number.");
+      return;
+    }
+
+    String fullPhoneNumber =
+        '+${selectedCountry?.phoneCode ?? '91'}$phonenumber';
 
     try {
-      DocumentReference docRef = users.doc(phonenumber);
+      DocumentReference docRef = users.doc(fullPhoneNumber);
       DocumentSnapshot docSnapshot = await docRef.get();
 
       if (!docSnapshot.exists) {
         await docRef.set({
           'contacts': [],
         });
-        print("New user created: $phonenumber");
+        print("New user created: $fullPhoneNumber");
       } else {
-        print("User already exists: $phonenumber");
+        print("User already exists: $fullPhoneNumber");
       }
 
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => Otp(phonenumber: _phoneController.text.trim()),
+          builder: (context) => Otp(phonenumber: fullPhoneNumber),
         ),
       );
     } catch (e) {
@@ -58,6 +63,7 @@ class _VerificationState extends State<Verification> {
   void initState() {
     super.initState();
     _phoneController.text = '';
+    selectedCountry = Country.parse("IN");
   }
 
   @override
@@ -69,7 +75,9 @@ class _VerificationState extends State<Verification> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
         leading: IconButton(
           onPressed: () => Navigator.pop(context),
           icon: Icon(Icons.arrow_back_ios),
@@ -87,29 +95,56 @@ class _VerificationState extends State<Verification> {
               ),
               SizedBox(height: 8.h),
               Text(
-                "Please confirm your country code and enter\n                 your phone number",
+                "Please confirm your country code and enter\n    your phone number",
                 style: TextStyle(fontSize: 17, fontWeight: FontWeight.w300),
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: 45.h),
-              TextField(
-                controller: _phoneController,
-                decoration: InputDecoration(
-                  fillColor: Colors.grey.shade200,
-                  filled: true,
-                  hintText: "Phone Number",
-                  hintStyle: TextStyle(fontSize: 20),
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFF002DE3)),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFF002DE3)),
-                  ),
-                ),
-                keyboardType: TextInputType.number,
-                inputFormatters: [
-                  LengthLimitingTextInputFormatter(10),
-                  FilteringTextInputFormatter.digitsOnly,
+              Row(
+                children: [
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: TextField(
+                      controller: _phoneController,
+                      decoration: InputDecoration(
+                        fillColor: Colors.grey.shade200,
+                        filled: true,
+                        hintText: "Phone Number",
+                        hintStyle: TextStyle(fontSize: 20),
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide(color: Color(0xFF002DE3)),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Color(0xFF002DE3)),
+                        ),
+                        prefixIcon: GestureDetector(
+                          onTap: () {
+                            showCountryPicker(
+                              context: context,
+                              showPhoneCode: true,
+                              onSelect: (Country country) {
+                                setState(() {
+                                  selectedCountry = country;
+                                });
+                              },
+                            );
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 15),
+                            child: Text(
+                              selectedCountry != null
+                                  ? "+${selectedCountry!.phoneCode}"
+                                  : "+91", // default
+                              style:
+                                  TextStyle(fontSize: 16, color: Colors.black),
+                            ),
+                          ),
+                        ),
+                      ),
+                      keyboardType: TextInputType.phone,
+                    ),
+                  )
                 ],
               ),
               SizedBox(height: 81.h),

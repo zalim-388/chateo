@@ -49,7 +49,11 @@ class _YourProfileState extends State<YourProfile> {
 
   Widget build(BuildContext context) {
     return Scaffold(
+            backgroundColor: Colors.white,
+
       appBar: AppBar(
+              backgroundColor: Colors.white,
+
         leading: IconButton(
             onPressed: () {
               Navigator.pop(context);

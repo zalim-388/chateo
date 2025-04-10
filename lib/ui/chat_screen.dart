@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:chateo/ui/bottomnavi.dart';
-import 'package:chateo/ui/home.dart';
 import 'package:chateo/utils/helpers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -28,7 +27,7 @@ class _ChatScreenState extends State<ChatScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   TextEditingController _messagecontroller = TextEditingController();
   // final CollectionReference contactsRef =
-  //     FirebaseFirestore.instance.collection("user");
+  //     FirebaseFirestore.instance.collection("users");
 
   @override
   void dispose() {
@@ -152,9 +151,28 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
+  Future<void> clearchat() async {
+    try {
+      var chatDocs = await _firestore
+          .collection("users")
+          .doc(widget.number)
+          .collection("contacts")
+          .doc(widget.receiverNumber)
+          .collection("chat")
+          .get();
+
+      for (var doc in chatDocs.docs) {
+        await doc.reference.delete();
+      }
+    } catch (e) {
+      print("Failed to clear chat: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Color(0xFF002DE3),
         leading: IconButton(
@@ -194,6 +212,41 @@ class _ChatScreenState extends State<ChatScreen> {
                   icon: Icon(Icons.call, color: Colors.white)),
               PopupMenuButton(
                 iconColor: Colors.white,
+                onSelected: (value) {
+                  if (value == "Report") {
+                    print("User reported");
+                  }
+                  if (value == "block") {
+                    print("User blocked");
+                  }
+                  if (value == "clear chat") {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title:
+                              Text("Are you sure you want to clear the chat?"),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: Text("Cancel"),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                clearchat();
+                                print("Chat cleared");
+
+                                Navigator.pop(context);
+                              },
+                              child: Text("Confirm"),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                    print("Chat cleared");
+                  }
+                },
                 itemBuilder: (context) {
                   return [
                     PopupMenuItem(
