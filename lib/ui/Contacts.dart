@@ -28,8 +28,7 @@ class _ContactsState extends State<Contacts> {
   final TextEditingController _namecontroller = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _mesagecontroller = TextEditingController();
-    Country? selectedCountry;
-
+  Country? selectedCountry;
 
   final CollectionReference contactsRef =
       FirebaseFirestore.instance.collection("users");
@@ -134,6 +133,159 @@ class _ContactsState extends State<Contacts> {
     } catch (error) {
       print("Error fetching contacts: $error");
     }
+  }
+
+  Future openFullScreenDialog(
+          BuildContext context,
+          TextEditingController phoneController,
+          TextEditingController namecontroller,
+          Future<void> Function() Addcontact) =>
+      showGeneralDialog(
+        context: context,
+        barrierLabel: '',
+        pageBuilder: (context, animation, secondaryAnimation) {
+          return Material(
+            child: Container(
+              width: double.infinity,
+              height: double.infinity,
+              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+              color: Colors.white,
+              child: Column(
+                children: [
+                  Expanded(
+                    child: Column(
+                      children: [
+                        SizedBox(
+                          height: 40.h,
+                        ),
+                        CircleAvatar(
+                          radius: 60,
+                          backgroundColor: Colors.black,
+                        ),
+                        SizedBox(height: 20),
+                        TextField(
+                          controller: namecontroller,
+                          decoration: InputDecoration(
+                            prefixIcon: Icon(
+                              Icons.person,
+                              color: Color(0xFF002DE3),
+                            ),
+                            hintText: "Name",
+                            hintStyle: TextStyle(fontSize: 17),
+                            border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(20),
+                                borderSide: BorderSide.none),
+                            focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(20),
+                                borderSide: BorderSide.none),
+                            fillColor: Colors.grey.shade300,
+                            filled: true,
+                          ),
+                        ),
+                        SizedBox(height: 20),
+                        TextField(
+                          controller: phoneController,
+                          decoration: InputDecoration(
+                            prefixIcon: GestureDetector(
+                              onTap: () {
+                                showCountryPicker(
+                                  context: context,
+                                  showPhoneCode: true,
+                                  onSelect: (Country country) {
+                                    setState(
+                                        () => selectedCountry = country);
+                                  },
+                                );
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 15),
+                                child: Text(
+                                  selectedCountry != null
+                                      ? "+${selectedCountry!.phoneCode}"
+                                      : "+91",
+                                  style: TextStyle(
+                                      fontSize: 16, color: Colors.black),
+                                ),
+                              ),
+                            ),
+                            hintText: "number",
+                            hintStyle: TextStyle(fontSize: 17),
+                            border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(20),
+                                borderSide: BorderSide.none),
+                            focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(20),
+                                borderSide: BorderSide.none),
+                            fillColor: Colors.grey.shade300,
+                            filled: true,
+                          ),
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [
+                            LengthLimitingTextInputFormatter(10)
+                          ],
+                        ),
+                        SizedBox(height: 20),
+                        Row(
+                          children: [
+                            TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                child: Text(
+                                  "Cancel",
+                                  style: TextStyle(
+                                    fontSize: 17,
+                                    color: Color(0xFF002DE3),
+                                  ),
+                                )),
+                            Spacer(),
+                            TextButton(
+                                onPressed: () async {
+                                  await Addcontact();
+                                  FocusScope.of(context).unfocus();
+
+                                  String name = namecontroller.text.trim();
+                                  print("name:${namecontroller.text}");
+                                  String number = phoneController.text.trim();
+                                  print("number:${phoneController.text}");
+
+                                  save(
+                                    context,
+                                    namecontroller,
+                                    phoneController,
+                                  );
+                                },
+                                child: Text(
+                                  "save",
+                                  style: TextStyle(
+                                    fontSize: 17,
+                                    color: Color(0xFF002DE3),
+                                  ),
+                                )),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+
+  void save(
+    BuildContext context,
+    TextEditingController _namecontroller,
+    TextEditingController _phoneController,
+  ) {
+    String name = _namecontroller.text.trim();
+    String number = _phoneController.text.trim();
+
+    Navigator.pop(context);
+    _namecontroller.clear();
+    _phoneController.clear();
   }
 
   Widget build(BuildContext context) {
@@ -305,169 +457,7 @@ class _ContactsState extends State<Contacts> {
   }
 }
 
-Future openFullScreenDialog(
-        BuildContext context,
-        TextEditingController phoneController,
-        TextEditingController namecontroller,
-        Future<void> Function() Addcontact) =>
-    showGeneralDialog(
-      context: context,
-      barrierLabel: '',
-      pageBuilder: (context, animation, secondaryAnimation) {
-        return Material(
-          child: Container(
-            width: double.infinity,
-            height: double.infinity,
-            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 40),
-            color: Colors.white,
-            child: Column(
-              children: [
-                Expanded(
-                  child: Column(
-                    children: [
-                      SizedBox(
-                        height: 40.h,
-                      ),
-                      CircleAvatar(
-                        radius: 60,
-                        backgroundColor: Colors.black,
-                      ),
-                      SizedBox(height: 20),
-                      TextField(
-                        controller: namecontroller,
-                        decoration: InputDecoration(
-                          prefixIcon: Icon(
-                            Icons.person,
-                            size: 25,
-                            color: Color(0xFF002DE3),
-                          ),
-                          hintText: "Name",
-                          hintStyle: TextStyle(fontSize: 17),
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(20),
-                              borderSide: BorderSide.none),
-                          focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(20),
-                              borderSide: BorderSide.none),
-                          fillColor: Colors.grey.shade300,
-                          filled: true,
-                        ),
-                      ),
-                      SizedBox(height: 20),
-                      TextField(
-                        controller: phoneController,
-                        decoration: InputDecoration(
-                          // prefixIcon: Icon(
-                          //   Icons.call,
-                          //   color: Color(0xFF002DE3),
-                          //   size: 25,
-                          
-                          // ),
-                          
-                          hintText: "Phone",
-                          hintStyle: TextStyle(fontSize: 17),
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(20),
-                              borderSide: BorderSide.none),
-                          focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(20),
-                              borderSide: BorderSide.none),
-                          fillColor: Colors.grey.shade300,
-                          filled: true,
 
-      prefixIcon: GestureDetector(
-                          onTap: () {
-                            showCountryPicker(
-                              context: context,
-                              showPhoneCode: true,
-                              onSelect: (Country country) {
-                                setState(() {
-                                  selectedCountry = country;
-                                });
-                              },
-                            );
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 15),
-                            child: Text(
-                              selectedCountry != null
-                                  ? "+${selectedCountry!.phoneCode}"
-                                  : "+91", // default
-                              style:
-                                  TextStyle(fontSize: 16, color: Colors.black),
-                            ),
-                          ),
-                        ),
-
-
-
-                        ),
-                        keyboardType: TextInputType.number,
-                        inputFormatters: [LengthLimitingTextInputFormatter(10)],
-                      ),
-                      SizedBox(height: 20),
-                      Row(
-                        children: [
-                          TextButton(
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                              child: Text(
-                                "Cancel",
-                                style: TextStyle(
-                                  fontSize: 17,
-                                  color: Color(0xFF002DE3),
-                                ),
-                              )),
-                          Spacer(),
-                          TextButton(
-                              onPressed: () async {
-                                await Addcontact();
-                                FocusScope.of(context).unfocus();
-
-                                String name = namecontroller.text.trim();
-                                print("name:${namecontroller.text}");
-                                String number = phoneController.text.trim();
-                                print("number:${phoneController.text}");
-
-                                save(
-                                  context,
-                                  namecontroller,
-                                  phoneController,
-                                );
-                              },
-                              child: Text(
-                                "save",
-                                style: TextStyle(
-                                  fontSize: 17,
-                                  color: Color(0xFF002DE3),
-                                ),
-                              )),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-
-void save(
-  BuildContext context,
-  TextEditingController _namecontroller,
-  TextEditingController _phoneController,
-) {
-  String name = _namecontroller.text.trim();
-  String number = _phoneController.text.trim();
-
-  Navigator.pop(context);
-  _namecontroller.clear();
-  _phoneController.clear();
-}
     // return contactsRef
     //     .doc("contacts")
     //     .update({

@@ -49,11 +49,9 @@ class _YourProfileState extends State<YourProfile> {
 
   Widget build(BuildContext context) {
     return Scaffold(
-            backgroundColor: Colors.white,
-
+      backgroundColor: Colors.white,
       appBar: AppBar(
-              backgroundColor: Colors.white,
-
+        backgroundColor: Colors.white,
         leading: IconButton(
             onPressed: () {
               Navigator.pop(context);
@@ -105,7 +103,7 @@ class _YourProfileState extends State<YourProfile> {
               child: TextField(
                 controller: _Firstnamecontroller,
                 decoration: InputDecoration(
-                    hintText: "First Name (Required)",
+                    hintText: "Name",
                     hintStyle: TextStyle(fontSize: 17),
                     fillColor: Colors.grey.shade200,
                     filled: true,
@@ -122,25 +120,25 @@ class _YourProfileState extends State<YourProfile> {
             SizedBox(
               height: 20.h,
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 25),
-              child: TextField(
-                controller: _lastnamecontroller,
-                decoration: InputDecoration(
-                    hintText: "Last Name (Required)",
-                    hintStyle: TextStyle(fontSize: 17),
-                    fillColor: Colors.grey.shade200,
-                    filled: true,
-                    border: OutlineInputBorder(
-                        borderSide: BorderSide(
-                      color: Color(0xFF002DE3),
-                    )),
-                    focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                      color: Color(0xFF002DE3),
-                    ))),
-              ),
-            ),
+            // Padding(
+            //   padding: const EdgeInsets.symmetric(horizontal: 25),
+            //   child: TextField(
+            //     controller: _lastnamecontroller,
+            //     decoration: InputDecoration(
+            //         hintText: "Last Name (Required)",
+            //         hintStyle: TextStyle(fontSize: 17),
+            //         fillColor: Colors.grey.shade200,
+            //         filled: true,
+            //         border: OutlineInputBorder(
+            //             borderSide: BorderSide(
+            //           color: Color(0xFF002DE3),
+            //         )),
+            //         focusedBorder: OutlineInputBorder(
+            //             borderSide: BorderSide(
+            //           color: Color(0xFF002DE3),
+            //         ))),
+            //   ),
+            // ),
             SizedBox(
               height: 40.h,
             ),

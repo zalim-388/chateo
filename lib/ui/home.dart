@@ -65,7 +65,6 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-
       body: Column(
         children: [
           Padding(
@@ -110,6 +109,9 @@ class _HomeState extends State<Home> {
               },
             ),
           ),
+
+//status
+
           SizedBox(height: 20.h),
           Expanded(
             child: StreamBuilder<DocumentSnapshot>(
@@ -123,7 +125,6 @@ class _HomeState extends State<Home> {
                   return Center(child: Text("Error: ${snapshot.error}"));
                 }
                 if (!snapshot.hasData || !snapshot.data!.exists) {
-                  // Fixed logic
                   return const Center(child: Text("No chats available"));
                 }
 

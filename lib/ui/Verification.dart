@@ -27,10 +27,6 @@ class _VerificationState extends State<Verification> {
       print("Fields cannot be empty");
       return;
     }
-    if (phonenumber.isEmpty || phonenumber.length != 10) {
-      print("Please enter a valid 10-digit phone number.");
-      return;
-    }
 
     String fullPhoneNumber =
         '+${selectedCountry?.phoneCode ?? '91'}$phonenumber';
@@ -143,6 +139,7 @@ class _VerificationState extends State<Verification> {
                         ),
                       ),
                       keyboardType: TextInputType.phone,
+                      maxLength: 10,
                     ),
                   )
                 ],
