@@ -37,8 +37,8 @@ class _MoreState extends State<More> {
     profile_name = prefs.getString("profile_name");
     phonenumber = prefs.getString("phonenumber") ?? "";
     setState(() {
-      profile_name = profile_name ?? "Your Name";
-      phonenumber = phonenumber ?? widget.phonenumber;
+        profile_name = profile_name ?? "Your Name";
+    phonenumber = phonenumber ?? widget.phonenumber;
       if (imagepath != null) {
         profile_image = File(imagepath);
       }
