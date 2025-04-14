@@ -144,7 +144,7 @@ class _ChatScreenState extends State<ChatScreen> {
             SimpleDialogOption(
               onPressed: () => _pickImage(ImageSource.camera),
               child: Icon(Icons.camera_alt_outlined),
-            )
+            ),
           ],
         );
       },
@@ -290,15 +290,16 @@ class _ChatScreenState extends State<ChatScreen> {
               if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                 return Center(child: Text("No messages yet"));
               }
-              var messages = snapshot.data!.docs;
+              final messages = snapshot.data!.docs;
 
               return ListView.builder(
                 reverse: true,
                 itemCount: messages.length,
                 itemBuilder: (context, index) {
-                  var message = messages[index].data() as Map<String, dynamic>;
-
-                  bool isme = message["sender"] == widget.number;
+                  final message =
+                      messages[index].data() as Map<String, dynamic>;
+                  final isme = message["sender"] == widget.number;
+                  final isimage = message["type"] == "image";
 
                   return SingleChildScrollView(
                     child: Align(
@@ -317,16 +318,23 @@ class _ChatScreenState extends State<ChatScreen> {
                                 borderRadius: BorderRadius.circular(10)),
                             child: Column(
                               crossAxisAlignment: isme
-                                  ? CrossAxisAlignment.start
-                                  : CrossAxisAlignment.end,
+                                  ? CrossAxisAlignment.end
+                                  : CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  message["text"] ?? "No message",
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: isme ? Colors.white : Colors.black87,
-                                  ),
-                                ),
+                                isimage
+                                    ? Image.network(
+                                        message["image url"],
+                                        width: 200,
+                                      )
+                                    : Text(
+                                        message["text"] ?? "No message",
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          color: isme
+                                              ? Colors.white
+                                              : Colors.black87,
+                                        ),
+                                      ),
                                 SizedBox(
                                   height: 5.h,
                                 ),
@@ -343,7 +351,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                   height: 5.h,
                                 ),
                                 if (message["type"] == "image")
-                                  Image.network(message["imageUrl"])
+                                  Image.network(message["imageUrl"]),
                               ],
                             ),
                           ),
