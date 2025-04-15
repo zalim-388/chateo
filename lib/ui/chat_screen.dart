@@ -83,67 +83,101 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  File? imagefile;
-  Future<void> _pickImage(ImageSource source) async {
-    final ImagePicker picker = ImagePicker();
+  File? imageFile;
 
+  Future<void> _pickAndSendImage(ImageSource source) async {
+    final ImagePicker picker = ImagePicker();
     final XFile? pickedFile = await picker.pickImage(source: source);
 
     if (pickedFile != null) {
-      setState(() {
-        imagefile = File(pickedFile.path);
-      });
+      imageFile = File(pickedFile.path);
+      String? imageUrl = await _uploadImage(imageFile!);
 
-      final filename = DateTime.now().millisecondsSinceEpoch.toString();
-      final storageRef =
-          FirebaseStorage.instance.ref().child("images/$filename.jpg");
-
-      try {
-        await storageRef.putFile(imagefile!);
-        String downloadurl = await storageRef.getDownloadURL();
-
-        await _firestore
-            .collection("users")
-            .doc(widget.number)
-            .collection("contacts")
-            .doc(widget.receiverNumber)
-            .collection("chat")
-            .add({
-          "type": "image",
-          "imageUrl": downloadurl,
-          "sender": widget.number,
-          "timestamp": FieldValue.serverTimestamp(),
-        });
-
-        await _firestore
-            .collection("users")
-            .doc(widget.receiverNumber)
-            .collection("contacts")
-            .doc(widget.number)
-            .collection("chat")
-            .add({
-          "type": "image",
-          "imageUrl": downloadurl,
-          "sender": widget.receiverNumber,
-          "timestamp": FieldValue.serverTimestamp()
-        });
-      } catch (e) {}
+      if (imageUrl != null) {
+        print("Image uploaded: $imageUrl");
+        await _sendImageMessage(imageUrl);
+      }
+    } else {
+      print("No image picked");
     }
   }
 
-  void _showAttachmentDialog() async {
+  Future<String?> _uploadImage(File imageFile) async {
+    try {
+      String fileName = DateTime.now().millisecondsSinceEpoch.toString();
+      Reference ref =
+          FirebaseStorage.instance.ref().child("chat_images/$fileName.jpg");
+
+      UploadTask uploadTask = ref.putFile(imageFile);
+      TaskSnapshot snapshot = await uploadTask;
+      String downloadUrl = await snapshot.ref.getDownloadURL();
+      return downloadUrl;
+    } catch (e) {
+      print("Error uploading image: $e");
+      return null;
+    }
+  }
+
+  Future<void> _sendImageMessage(String imageUrl) async {
+    try {
+      Map<String, dynamic> imageMessage = {
+        "type": "image",
+        "imageUrl": imageUrl,
+        "sender": widget.number,
+        "timestamp": FieldValue.serverTimestamp(),
+      };
+
+      await _firestore
+          .collection("users")
+          .doc(widget.number)
+          .collection("contacts")
+          .doc(widget.receiverNumber)
+          .collection("chat")
+          .add(imageMessage);
+
+      await _firestore
+          .collection("users")
+          .doc(widget.receiverNumber)
+          .collection("contacts")
+          .doc(widget.number)
+          .collection("chat")
+          .add(imageMessage);
+    } catch (e) {
+      print("Error sending image message: $e");
+    }
+  }
+
+  void _showAttachmentDialog() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return SimpleDialog(
           children: <Widget>[
             SimpleDialogOption(
-              onPressed: () => _pickImage(ImageSource.gallery),
-              child: Icon(Icons.image_outlined),
+              onPressed: () {
+                Navigator.pop(context);
+                _pickAndSendImage(ImageSource.gallery);
+              },
+              child: Row(
+                children: [
+                  Icon(Icons.image_outlined),
+                  SizedBox(width: 10),
+                  Text('Gallery'),
+                ],
+              ),
             ),
             SimpleDialogOption(
-              onPressed: () => _pickImage(ImageSource.camera),
-              child: Icon(Icons.camera_alt_outlined),
+              onPressed: () {
+                Navigator.pop(context);
+                _pickAndSendImage(ImageSource.camera);
+              },
+              child: Row(
+                children: [
+                  Icon(Icons.camera_alt_outlined),
+                  SizedBox(width: 10),
+                  Text('Camera'),
+                ],
+              ),
             ),
           ],
         );
@@ -323,7 +357,7 @@ class _ChatScreenState extends State<ChatScreen> {
                               children: [
                                 isimage
                                     ? Image.network(
-                                        message["image url"],
+                                        message["imageUrl"],
                                         width: 200,
                                       )
                                     : Text(
@@ -351,7 +385,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                   height: 5.h,
                                 ),
                                 if (message["type"] == "image")
-                                  Image.network(message["imageUrl"]),
+                                  Image.network(message["imageurl"]),
                               ],
                             ),
                           ),
@@ -363,6 +397,38 @@ class _ChatScreenState extends State<ChatScreen> {
               );
             },
           )),
+          if (imageFile != null)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              child: Stack(children: [
+                Container(
+                  height: 150,
+                  width: 150,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    image: DecorationImage(
+                      image: FileImage(imageFile!),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+                Positioned(
+                    right: 0,
+                    top: 0,
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          imageFile = null;
+                        });
+                      },
+                      child: CircleAvatar(
+                        radius: 14,
+                        backgroundColor: Colors.black54,
+                        child: Icon(Icons.close, color: Colors.white, size: 16),
+                      ),
+                    ))
+              ]),
+            ),
           Padding(
             padding: const EdgeInsets.all(10),
             child: Row(
@@ -394,14 +460,19 @@ class _ChatScreenState extends State<ChatScreen> {
                             borderSide: BorderSide.none)),
                   ),
                 ),
-                IconButton(
-                    onPressed: () => sendmessage(
-                          widget.number,
-                        ),
-                    icon: Icon(
-                      Icons.send,
-                      color: Color(0xFF002DE3),
-                    ))
+                imageFile != null
+                    ? IconButton(
+                        onPressed: () {
+                          if (imageFile != null) {
+                            _sendImageMessage(imageFile!.path);
+                          }
+                        },
+                        icon: Icon(Icons.send, color: Colors.green),
+                      )
+                    : IconButton(
+                        onPressed: () => sendmessage(widget.number),
+                        icon: Icon(Icons.send, color: Color(0xFF002DE3)),
+                      )
               ],
             ),
           )

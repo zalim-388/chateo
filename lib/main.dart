@@ -26,18 +26,24 @@ class MyApp extends StatelessWidget {
             designSize: const Size(375, 812),
             builder: (context, child) {
               return MaterialApp(
-                    supportedLocales: [
-        const Locale('en'),
-        const Locale('el'),
-        const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans'), // Generic Simplified Chinese 'zh_Hans'
-        const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant'), // Generic traditional Chinese 'zh_Hant'
-      ],
-      localizationsDelegates: [
-        CountryLocalizations.delegate,
-        // GlobalMaterialLocalizations.delegate,
-        // GlobalWidgetsLocalizations.delegate,
-        // GlobalCupertinoLocalizations.delegate,
-      ],
+                supportedLocales: [
+                  const Locale('en'),
+                  const Locale('el'),
+                  const Locale.fromSubtags(
+                      languageCode: 'zh',
+                      scriptCode:
+                          'Hans'), // Generic Simplified Chinese 'zh_Hans'
+                  const Locale.fromSubtags(
+                      languageCode: 'zh',
+                      scriptCode:
+                          'Hant'), // Generic traditional Chinese 'zh_Hant'
+                ],
+                localizationsDelegates: [
+                  CountryLocalizations.delegate,
+                  // GlobalMaterialLocalizations.delegate,
+                  // GlobalWidgetsLocalizations.delegate,
+                  // GlobalCupertinoLocalizations.delegate,
+                ],
                 theme: ThemeData(
                   primaryColor: Color(0xFF002DE3),
                 ),

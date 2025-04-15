@@ -33,8 +33,8 @@ class _VerificationState extends State<Verification> {
 
     try {
       DocumentReference docRef = users.doc(fullPhoneNumber);
-      DocumentSnapshot docSnapshot = await docRef.get();
 
+      DocumentSnapshot docSnapshot = await docRef.get();
       if (!docSnapshot.exists) {
         await docRef.set({
           'contacts': [],
