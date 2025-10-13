@@ -7,30 +7,33 @@ plugins {
 
 android {
     namespace "com.example.chateo"
-    compileSdkVersion 34 // Set manually
-    ndkVersion "25.1.8937393"// Ensure correct NDK version
-    
-
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
+    compileSdkVersion 34 // Latest compile SDK
+    ndkVersion "25.1.8937393" // Ensure correct NDK version
 
     defaultConfig {
         applicationId "com.example.chateo"
-        minSdkVersion 23  // Fixed: Use minSdkVersion instead of minSdk
-        targetSdkVersion 33  // Fixed: Use targetSdkVersion instead of targetSdk
+        minSdkVersion 23
+        targetSdkVersion 34
         versionCode 1
         versionName "1.0"
+    }
+
+    compileOptions {
+        // Updated for AGP 8.2.1+
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = "17" // Match Java version
     }
 
     buildTypes {
         release {
             signingConfig signingConfigs.debug
+            // Optional: enable ProGuard if needed
+            // minifyEnabled true
+            // proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 }

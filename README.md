@@ -1,16 +1,17 @@
-# chateo
+# 💬 Chateo
 
-A new Flutter project.
+> A modern real-time chat application built with Flutter and Firebase
 
-## Getting Started
+## 📥 Download APK  
+👉 [Download Chateo App](https://drive.google.com/file/d/1n0ulhIy6tAyzjsq_IdRBWxHIv8tC_Pyv/view?usp=sharing)
 
-This project is a starting point for a Flutter application.
+---
 
-A few resources to get you started if this is your first Flutter project:
+## ✨ Features
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- 🔐 **Firebase Authentication** - Secure email/password login
+- 💬 **Real-time Messaging** - Instant message sync with Cloud Firestore
+- 🎨 **Modern UI** - Clean and intuitive interface
+- ☁️ **Cloud Storage** - Messages stored securely in Firestore
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+---

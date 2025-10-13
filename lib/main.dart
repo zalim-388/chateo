@@ -1,4 +1,5 @@
 import 'package:chateo/firebase_options.dart';
+import 'package:chateo/ui/Verification.dart';
 import 'package:chateo/ui/splashscreen.dart';
 import 'package:country_picker/country_picker.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -51,7 +52,7 @@ class MyApp extends StatelessWidget {
                 themeMode:
                     darkNotifier.value ? ThemeMode.dark : ThemeMode.light,
                 debugShowCheckedModeBanner: false,
-                home: Splashscreen(),
+                home:Verification(),
               );
             },
           );
